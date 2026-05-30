@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPGEE Mock Exam | Connectek Rx Success</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #122040;
+    --teal: #00b4a6;
+    --teal-light: #00d4c4;
+    --gold: #f0b429;
+    --gold-light: #fcd34d;
+    --white: #f8fafc;
+    --muted: #94a3b8;
+    --card-bg: #111e35;
+    --border: rgba(0,180,166,0.2);
+    --correct: #10b981;
+    --wrong: #ef4444;
+    --unanswered: #f59e0b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--navy); color: var(--white); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--navy-mid);
+    border-bottom: 2px solid var(--teal);
+    padding: 14px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top:0; z-index:100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-icon {
+    width:44px; height:44px; background: linear-gradient(135deg,var(--teal),var(--teal-light));
+    border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:22px;
+  }
+  .logo-text { line-height:1.1; }
+  .logo-text strong { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--white); display:block; }
+  .logo-text span { font-size:0.7rem; color:var(--teal-light); letter-spacing:2px; text-transform:uppercase; }
+  .header-right { display:flex; align-items:center; gap:20px; }
+  #timer { font-family:'DM Mono',monospace; font-size:1.3rem; color:var(--gold); background:rgba(240,180,41,0.1); padding:6px 16px; border-radius:8px; border:1px solid rgba(240,180,41,0.3); }
+  #q-counter { font-size:0.85rem; color:var(--muted); }
+
+  /* ── PAGES ── */
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ── REGISTRATION ── */
+  #reg-page {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at 30% 20%, rgba(0,180,166,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(240,180,41,0.08) 0%, transparent 60%), var(--navy);
+    padding:40px 20px;
+  }
+  .reg-card {
+    background: var(--card-bg); border:1px solid var(--border);
+    border-radius:20px; padding:48px; max-width:540px; width:100%;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  }
+  .reg-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(0,180,166,0.12); border:1px solid var(--teal);
+    color:var(--teal-light); font-size:0.72rem; letter-spacing:2px; text-transform:uppercase;
+    padding:5px 14px; border-radius:20px; margin-bottom:20px;
+  }
+  .reg-card h1 { font-family:'Playfair Display',serif; font-size:2rem; line-height:1.2; margin-bottom:8px; }
+  .reg-card h1 span { color:var(--teal); }
+  .reg-card p { color:var(--muted); font-size:0.9rem; margin-bottom:30px; line-height:1.6; }
+  .reg-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:30px; }
+  .reg-stat { background:rgba(0,180,166,0.06); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center; }
+  .reg-stat strong { display:block; font-size:1.3rem; color:var(--teal); font-family:'DM Mono',monospace; }
+  .reg-stat span { font-size:0.72rem; color:var(--muted); }
+  label { display:block; font-size:0.8rem; font-weight:600; color:var(--teal-light); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; margin-top:16px; }
+  input, select {
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    color:var(--white); border-radius:10px; padding:12px 16px; font-family:'DM Sans',sans-serif; font-size:0.95rem;
+    outline:none; transition:border 0.2s;
+  }
+  input:focus, select:focus { border-color:var(--teal); }
+  select option { background:var(--navy-mid); }
+  .reg-disclaimer { font-size:0.78rem; color:var(--muted); margin-top:12px; line-height:1.5; }
+  .btn-primary {
+    width:100%; margin-top:24px; padding:14px; background:linear-gradient(135deg,var(--teal),var(--teal-light));
+    color:var(--navy); font-weight:700; font-size:1rem; border:none; border-radius:12px;
+    cursor:pointer; letter-spacing:0.5px; transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,180,166,0.4); }
+
+  /* ── EXAM PAGE ── */
+  #exam-page { padding:30px 20px; max-width:900px; margin:0 auto; }
+  .progress-wrap { margin-bottom:24px; }
+  .progress-bar { height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--teal),var(--teal-light)); border-radius:3px; transition:width 0.3s; }
+  .progress-label { display:flex; justify-content:space-between; font-size:0.78rem; color:var(--muted); margin-bottom:6px; }
+
+  .q-card {
+    background: var(--card-bg); border:1px solid var(--border);
+    border-radius:16px; padding:32px; margin-bottom:20px;
+    animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .q-meta { display:flex; gap:10px; align-items:center; margin-bottom:16px; }
+  .q-num { background:var(--teal); color:var(--navy); font-weight:700; font-size:0.8rem; padding:3px 10px; border-radius:6px; font-family:'DM Mono',monospace; }
+  .q-cat { background:rgba(240,180,41,0.12); color:var(--gold); font-size:0.75rem; padding:3px 10px; border-radius:6px; border:1px solid rgba(240,180,41,0.25); }
+  .q-text { font-size:1.05rem; line-height:1.7; color:var(--white); margin-bottom:22px; font-weight:400; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option {
+    display:flex; align-items:flex-start; gap:14px;
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px; padding:14px 16px; cursor:pointer; transition:all 0.18s;
+  }
+  .option:hover:not(.disabled) { background:rgba(0,180,166,0.1); border-color:var(--teal); }
+  .option.selected { background:rgba(0,180,166,0.15); border-color:var(--teal); }
+  .option.correct { background:rgba(16,185,129,0.15); border-color:var(--correct); }
+  .option.wrong { background:rgba(239,68,68,0.12); border-color:var(--wrong); }
+  .option.disabled { cursor:default; }
+  .opt-letter {
+    width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.8rem; font-family:'DM Mono',monospace; flex-shrink:0;
+    background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid rgba(255,255,255,0.1);
+    transition:all 0.18s;
+  }
+  .option.selected .opt-letter { background:var(--teal); color:var(--navy); border-color:var(--teal); }
+  .option.correct .opt-letter { background:var(--correct); color:#fff; border-color:var(--correct); }
+  .option.wrong .opt-letter { background:var(--wrong); color:#fff; border-color:var(--wrong); }
+  .opt-text { font-size:0.95rem; line-height:1.5; padding-top:3px; }
+
+  .explanation {
+    margin-top:16px; background:rgba(0,180,166,0.07); border:1px solid var(--border);
+    border-radius:10px; padding:16px; font-size:0.9rem; line-height:1.6; color:#cbd5e1;
+    display:none;
+  }
+  .explanation.show { display:block; }
+  .explanation strong { color:var(--teal-light); }
+
+  .nav-row { display:flex; gap:12px; justify-content:space-between; align-items:center; margin-top:8px; }
+  .btn-nav {
+    padding:11px 24px; border-radius:10px; font-weight:600; font-size:0.9rem;
+    cursor:pointer; border:none; transition:all 0.15s; font-family:'DM Sans',sans-serif;
+  }
+  .btn-prev { background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid rgba(255,255,255,0.1); }
+  .btn-prev:hover { background:rgba(255,255,255,0.1); color:var(--white); }
+  .btn-next { background:linear-gradient(135deg,var(--teal),var(--teal-light)); color:var(--navy); }
+  .btn-next:hover { box-shadow:0 4px 16px rgba(0,180,166,0.4); }
+  .btn-submit { background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--navy); }
+  .btn-submit:hover { box-shadow:0 4px 16px rgba(240,180,41,0.4); }
+
+  /* Question Navigator */
+  .q-navigator { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px; }
+  .q-dot {
+    width:32px; height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-size:0.7rem; font-weight:700; cursor:pointer; font-family:'DM Mono',monospace;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:var(--muted);
+    transition:all 0.15s;
+  }
+  .q-dot.answered { background:rgba(0,180,166,0.2); border-color:var(--teal); color:var(--teal-light); }
+  .q-dot.current { background:var(--teal); color:var(--navy); border-color:var(--teal); }
+  .q-dot:hover { border-color:var(--teal); }
+
+  /* ── RESULTS PAGE ── */
+  #result-page { padding:40px 20px; max-width:900px; margin:0 auto; }
+  .result-hero {
+    background:var(--card-bg); border:1px solid var(--border);
+    border-radius:20px; padding:40px; text-align:center; margin-bottom:28px;
+    background-image: radial-gradient(ellipse at top, rgba(0,180,166,0.08) 0%, transparent 70%);
+  }
+  .result-score-ring {
+    width:140px; height:140px; border-radius:50%; margin:0 auto 20px;
+    background: conic-gradient(var(--teal) 0%, var(--teal-light) var(--pct), rgba(255,255,255,0.05) var(--pct));
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .result-score-ring::before {
+    content:''; position:absolute; width:110px; height:110px; border-radius:50%;
+    background:var(--card-bg);
+  }
+  .score-inner { position:relative; z-index:1; text-align:center; }
+  .score-inner span { display:block; font-family:'DM Mono',monospace; font-size:2rem; color:var(--teal); font-weight:700; }
+  .score-inner small { font-size:0.75rem; color:var(--muted); }
+  .result-hero h2 { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:6px; }
+  .result-verdict {
+    display:inline-block; padding:6px 20px; border-radius:20px; font-size:0.85rem; font-weight:600;
+    margin-bottom:16px;
+  }
+  .verdict-pass { background:rgba(16,185,129,0.15); color:var(--correct); border:1px solid rgba(16,185,129,0.3); }
+  .verdict-fail { background:rgba(239,68,68,0.12); color:var(--wrong); border:1px solid rgba(239,68,68,0.3); }
+
+  .result-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:24px; }
+  .result-stat { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px; text-align:center; }
+  .result-stat strong { display:block; font-size:1.4rem; font-family:'DM Mono',monospace; }
+  .result-stat span { font-size:0.75rem; color:var(--muted); }
+  .stat-correct strong { color:var(--correct); }
+  .stat-wrong strong { color:var(--wrong); }
+  .stat-skip strong { color:var(--unanswered); }
+  .stat-time strong { color:var(--teal); }
+
+  /* Category breakdown */
+  .breakdown-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:28px; margin-bottom:20px; }
+  .breakdown-card h3 { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:20px; color:var(--teal-light); }
+  .cat-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .cat-label { width:180px; font-size:0.82rem; color:var(--muted); flex-shrink:0; }
+  .cat-bar-wrap { flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; }
+  .cat-bar { height:100%; background:linear-gradient(90deg,var(--teal),var(--teal-light)); border-radius:4px; transition:width 0.6s ease; }
+  .cat-pct { width:42px; text-align:right; font-size:0.82rem; font-family:'DM Mono',monospace; color:var(--white); }
+
+  /* Review section */
+  .review-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:14px; }
+  .review-q { font-size:0.95rem; margin-bottom:12px; line-height:1.6; }
+  .review-answers { display:flex; flex-direction:column; gap:6px; }
+  .rev-opt { font-size:0.85rem; padding:8px 12px; border-radius:7px; }
+  .rev-opt.correct { background:rgba(16,185,129,0.12); color:#6ee7b7; border-left:3px solid var(--correct); }
+  .rev-opt.wrong { background:rgba(239,68,68,0.1); color:#fca5a5; border-left:3px solid var(--wrong); }
+  .rev-opt.correct-ans { background:rgba(16,185,129,0.08); color:#a7f3d0; border-left:3px solid var(--correct); }
+  .review-exp { font-size:0.83rem; color:#94a3b8; margin-top:10px; padding:10px; background:rgba(0,180,166,0.05); border-radius:6px; line-height:1.6; }
+  .review-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+  .btn-secondary { padding:10px 22px; background:transparent; border:1px solid var(--teal); color:var(--teal-light); border-radius:10px; cursor:pointer; font-size:0.88rem; font-family:'DM Sans',sans-serif; font-weight:600; transition:all 0.15s; }
+  .btn-secondary:hover { background:rgba(0,180,166,0.1); }
+
+  .section-title { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:16px; }
+  .section-title span { color:var(--teal); }
+
+  /* Responsive */
+  @media(max-width:600px) {
+    .result-grid { grid-template-columns:1fr 1fr; }
+    .reg-stats { grid-template-columns:1fr; }
+    .reg-card { padding:28px 20px; }
+    .q-card { padding:20px; }
+    .header { padding:10px 16px; }
+    #timer { font-size:1rem; }
+    .cat-label { width:120px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header" id="main-header" style="display:none;">
+  <div class="logo">
+    <div class="logo-icon">💊</div>
+    <div class="logo-text">
+      <strong>Connectek Rx Success</strong>
+      <span>FPGEE Mock Exam</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span id="q-counter">Q 1 / 200</span>
+    <div id="timer">3:00:00</div>
+  </div>
+</div>
+
+<!-- REGISTRATION PAGE -->
+<div id="reg-page" class="page active">
+  <div class="reg-card">
+    <div class="reg-badge">💊 Official Mock Exam</div>
+    <h1>FPGEE <span>Mock Exam</span></h1>
+    <p>Prepared exclusively by <strong>Connectek Rx Success</strong> — 200 comprehensive questions covering all FPGEE domains with detailed explanations and performance analytics.</p>
+    <div class="reg-stats">
+      <div class="reg-stat"><strong>200</strong><span>Questions</span></div>
+      <div class="reg-stat"><strong>3 hrs</strong><span>Duration</span></div>
+      <div class="reg-stat"><strong>75%</strong><span>Pass Mark</span></div>
+    </div>
+    <label>Full Name</label>
+    <input type="text" id="reg-name" placeholder="Dr. / Mr. / Ms. Your Full Name" />
+    <label>Email Address</label>
+    <input type="email" id="reg-email" placeholder="your.email@example.com" />
+    <label>Planned FPGEE Year</label>
+    <select id="reg-year">
+      <option value="">— Select Year —</option>
+      <option>2025</option><option>2026</option><option>2027</option><option>2028</option>
+    </select>
+    <label>Country of Pharmacy Degree</label>
+    <input type="text" id="reg-country" placeholder="e.g. India, Nigeria, Philippines…" />
+    <p class="reg-disclaimer">⚠️ Your details will be shared with Connectek Rx Success at pharmacy.connectek@gmail.com for personalised support and resources.</p>
+    <button class="btn-primary" onclick="startExam()">Begin Mock Exam →</button>
+  </div>
+</div>
+
+<!-- EXAM PAGE -->
+<div id="exam-page" class="page">
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="prog-label">Question 1 of 200</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0.5%"></div></div>
+  </div>
+  <div class="q-navigator" id="q-navigator"></div>
+  <div id="q-card-wrap"></div>
+  <div class="nav-row">
+    <button class="btn-nav btn-prev" onclick="changeQ(-1)">← Previous</button>
+    <button class="btn-nav btn-next" id="btn-next" onclick="nextOrSubmit()">Next →</button>
+  </div>
+</div>
+
+<!-- RESULTS PAGE -->
+<div id="result-page" class="page">
+  <div class="result-hero" id="result-hero"></div>
+  <div class="breakdown-card" id="cat-breakdown"></div>
+  <div id="review-section"></div>
+</div>
+
+<script>
+// ── QUESTIONS DATABASE ── 200 Qs, answers spread A/B/C/D
+// Distribution target: ~50 each of A,B,C,D
+const QS = [
+// PHARMACEUTICAL SCIENCES
+{q:"Which pharmacokinetic parameter describes the relationship between drug dose and plasma concentration?",opts:["Volume of distribution","Bioavailability","Half-life","Clearance"],a:1,cat:"Pharmacokinetics",exp:"Bioavailability (F) describes the fraction of an administered dose that reaches systemic circulation. It directly relates dose to plasma concentration, especially for extravascular routes."},
+{q:"The Henderson-Hasselbalch equation is used to predict drug:",opts:["Protein binding","Ionization at a given pH","Rate of renal excretion","Hepatic extraction ratio"],a:1,cat:"Pharmaceutics",exp:"The Henderson-Hasselbalch equation (pH = pKa + log[A⁻]/[HA]) predicts the degree of ionization of a drug at any given pH, which influences absorption, distribution, and elimination."},
+{q:"First-pass metabolism is most significant for which route of administration?",opts:["Intravenous","Sublingual","Oral","Transdermal"],a:2,cat:"Pharmacokinetics",exp:"Oral administration subjects drugs to first-pass metabolism in the gut wall and liver before reaching systemic circulation, significantly reducing bioavailability for many drugs."},
+{q:"Zero-order kinetics means drug elimination is:",opts:["Proportional to drug concentration","Constant regardless of concentration","Dependent on renal function","Accelerated by enzyme induction"],a:1,cat:"Pharmacokinetics",exp:"Zero-order kinetics describe elimination at a constant rate regardless of drug concentration (e.g., ethanol, phenytoin at high doses), unlike first-order where rate is proportional to concentration."},
+{q:"Which dosage form provides the most rapid onset of action for a systemic drug?",opts:["Extended-release tablet","Oral solution","Intravenous injection","Intramuscular injection"],a:2,cat:"Pharmaceutics",exp:"IV injection delivers drug directly into systemic circulation, bypassing absorption entirely, giving the fastest onset of action (immediate). Bioavailability is 100%."},
+{q:"Enteric coating on tablets is designed to:",opts:["Mask the taste of the drug","Protect the drug from gastric acid","Increase dissolution rate","Enhance transdermal absorption"],a:1,cat:"Pharmaceutics",exp:"Enteric coatings resist gastric acid (pH 1-3) but dissolve in the alkaline pH of the small intestine, protecting acid-labile drugs or preventing gastric irritation."},
+{q:"Which plasma protein is primarily responsible for binding acidic drugs?",opts:["Alpha-1 acid glycoprotein","Albumin","Globulin","Transferrin"],a:1,cat:"Pharmacokinetics",exp:"Albumin is the primary binding protein for acidic drugs (e.g., warfarin, NSAIDs, penicillin). Alpha-1 acid glycoprotein primarily binds basic drugs (e.g., lidocaine, propranolol)."},
+{q:"The term 'therapeutic window' refers to the range of drug concentrations that are:",opts:["Safe but not effective","Effective and have acceptable toxicity","Toxic but effective","Subtherapeutic"],a:1,cat:"Pharmacokinetics",exp:"The therapeutic window (index) is the concentration range between minimum effective concentration (MEC) and minimum toxic concentration (MTC) where a drug produces the desired effect safely."},
+{q:"A drug with a high volume of distribution (Vd) is likely:",opts:["Confined to plasma only","Extensively distributed into tissues","Eliminated rapidly by kidneys","Highly water-soluble"],a:1,cat:"Pharmacokinetics",exp:"High Vd (>1 L/kg) indicates extensive tissue distribution. The drug leaves the plasma compartment and concentrates in peripheral tissues, often due to lipophilicity or tissue binding."},
+{q:"Prodrugs are designed to:",opts:["Increase drug toxicity","Be converted to active drug in the body","Bypass hepatic metabolism entirely","Reduce drug absorption"],a:1,cat:"Pharmacology",exp:"Prodrugs are pharmacologically inactive compounds converted to active metabolites in vivo. Examples: enalapril→enalaprilat, codeine→morphine. This strategy improves bioavailability or targeting."},
+// PHARMACOLOGY
+{q:"Beta-1 adrenergic receptors are primarily located in the:",opts:["Bronchi","Heart","Peripheral vasculature","Pupils"],a:1,cat:"Pharmacology",exp:"β1 receptors are predominantly in the heart. Their activation increases heart rate (chronotropy) and contractility (inotropy). β2 receptors are mainly in bronchi and peripheral vasculature."},
+{q:"Acetylcholinesterase inhibitors are used in the treatment of:",opts:["Parkinson's disease","Myasthenia gravis","Hypertension","Diabetes insipidus"],a:1,cat:"Pharmacology",exp:"AChE inhibitors (neostigmine, pyridostigmine) treat myasthenia gravis by increasing acetylcholine at the neuromuscular junction, improving muscle strength in this autoimmune disorder."},
+{q:"Which drug class acts by blocking the sodium-potassium-chloride cotransporter (NKCC2)?",opts:["Thiazide diuretics","Loop diuretics","Potassium-sparing diuretics","Carbonic anhydrase inhibitors"],a:1,cat:"Pharmacology",exp:"Loop diuretics (furosemide, bumetanide) inhibit the NKCC2 transporter in the thick ascending limb of Henle, producing powerful natriuresis and diuresis, effective even in severe renal impairment."},
+{q:"The mechanism of action of statins is:",opts:["Inhibition of cholesterol absorption","HMG-CoA reductase inhibition","Activation of LPL enzyme","Bile acid sequestration"],a:1,cat:"Pharmacology",exp:"Statins inhibit HMG-CoA reductase, the rate-limiting enzyme in cholesterol biosynthesis. This upregulates LDL receptors and lowers plasma LDL cholesterol."},
+{q:"Which opioid receptor subtype is primarily responsible for analgesia?",opts:["Kappa (κ)","Mu (μ)","Delta (δ)","Sigma (σ)"],a:1,cat:"Pharmacology",exp:"Mu (μ) opioid receptors mediate most of the analgesic effects of opioids, along with euphoria, respiratory depression, and physical dependence. They are the primary target for morphine, fentanyl, and codeine."},
+{q:"ACE inhibitors lower blood pressure primarily by:",opts:["Blocking calcium channels","Reducing angiotensin II formation","Blocking aldosterone receptors","Activating beta receptors"],a:1,cat:"Pharmacology",exp:"ACE inhibitors block conversion of angiotensin I to angiotensin II, reducing vasoconstriction and aldosterone release. This lowers systemic vascular resistance and blood pressure."},
+{q:"Warfarin's anticoagulant effect is mediated by inhibiting:",opts:["Thrombin directly","Vitamin K-dependent clotting factor synthesis","Platelet aggregation","Factor Xa directly"],a:1,cat:"Pharmacology",exp:"Warfarin inhibits vitamin K epoxide reductase, depleting reduced vitamin K needed for activation of factors II, VII, IX, X and proteins C and S. Effects are delayed 2-3 days."},
+{q:"Which class of antidepressants selectively inhibits serotonin reuptake?",opts:["TCAs","SSRIs","MAOIs","SNRIs"],a:1,cat:"Pharmacology",exp:"SSRIs (fluoxetine, sertraline, paroxetine) selectively block the serotonin transporter (SERT), increasing synaptic serotonin. They have a favorable side effect profile compared to TCAs and MAOIs."},
+{q:"Metformin's primary mechanism of action is:",opts:["Insulin secretion stimulation","AMPK activation and hepatic glucose reduction","GLP-1 receptor agonism","SGLT-2 inhibition"],a:1,cat:"Pharmacology",exp:"Metformin activates AMPK (AMP-activated protein kinase), primarily reducing hepatic gluconeogenesis. It also improves insulin sensitivity and does not cause hypoglycemia as monotherapy."},
+{q:"Digoxin increases cardiac contractility by:",opts:["Activating beta-1 receptors","Inhibiting Na+/K+ ATPase","Blocking calcium channels","Activating cAMP pathway"],a:1,cat:"Pharmacology",exp:"Digoxin inhibits Na⁺/K⁺ ATPase, causing intracellular Na⁺ accumulation, which reduces Na⁺/Ca²⁺ exchanger activity, increasing intracellular Ca²⁺ and myocardial contractility."},
+// MEDICINAL CHEMISTRY
+{q:"Which functional group is responsible for the antibacterial activity of penicillins?",opts:["Thiazolidine ring","Beta-lactam ring","Amide bond","Carboxyl group"],a:1,cat:"Medicinal Chemistry",exp:"The beta-lactam ring in penicillins is essential for activity. It irreversibly binds and inactivates penicillin-binding proteins (PBPs), inhibiting bacterial cell wall synthesis."},
+{q:"The structure-activity relationship (SAR) of benzodiazepines shows that substitution at position 7 with an electron-withdrawing group:",opts:["Decreases CNS activity","Increases CNS depressant activity","Has no effect on activity","Increases peripheral effects"],a:1,cat:"Medicinal Chemistry",exp:"In benzodiazepines, electron-withdrawing groups (e.g., -Cl, -NO₂) at position 7 of the benzodiazepine ring increase CNS activity by enhancing receptor binding affinity."},
+{q:"Aspirin acetylates which amino acid residue of cyclooxygenase?",opts:["Tyrosine","Serine","Cysteine","Lysine"],a:1,cat:"Medicinal Chemistry",exp:"Aspirin irreversibly acetylates a serine residue (Ser530) in the active site of COX-1 and COX-2, blocking access of arachidonic acid and preventing prostaglandin synthesis."},
+{q:"Which property makes a drug molecule more likely to penetrate the blood-brain barrier?",opts:["High molecular weight","High lipophilicity and low ionization","Low protein binding","High water solubility"],a:1,cat:"Medicinal Chemistry",exp:"Blood-brain barrier penetration requires lipophilicity (logP 1-3), low molecular weight (<500 Da), low ionization at physiological pH, and low plasma protein binding."},
+{q:"Sulfonamides act as antimicrobials by:",opts:["Inhibiting DNA gyrase","Competitive inhibition of PABA utilization","Disrupting cell membrane integrity","Blocking protein synthesis at 30S ribosome"],a:1,cat:"Medicinal Chemistry",exp:"Sulfonamides are structural analogs of PABA. They competitively inhibit dihydropteroate synthase, blocking folic acid synthesis in bacteria (humans obtain folate from diet, so are unaffected)."},
+// PHARMACOTHERAPY
+{q:"First-line treatment for community-acquired pneumonia in a non-hospitalized, healthy adult is:",opts:["IV vancomycin","Amoxicillin or azithromycin","Piperacillin-tazobactam","Meropenem"],a:1,cat:"Pharmacotherapy",exp:"Outpatient CAP in previously healthy adults with no recent antibiotic use is treated with amoxicillin OR macrolide (azithromycin/clarithromycin) per IDSA/ATS guidelines."},
+{q:"The drug of choice for acute gout attack is:",opts:["Allopurinol","Colchicine or NSAIDs","Probenecid","Febuxostat"],a:1,cat:"Pharmacotherapy",exp:"Colchicine or NSAIDs (indomethacin) are first-line for acute gout. Allopurinol and febuxostat are for prevention/prophylaxis and should NOT be started during an acute attack."},
+{q:"In type 2 diabetes, which medication should be preferred in a patient with established cardiovascular disease?",opts:["Glipizide","Empagliflozin or liraglutide","Pioglitazone","Acarbose"],a:1,cat:"Pharmacotherapy",exp:"SGLT-2 inhibitors (empagliflozin, canagliflozin) and GLP-1 agonists (liraglutide, semaglutide) have proven cardiovascular benefit and are preferred in T2DM patients with established CVD."},
+{q:"Which antibiotic is associated with causing tendon rupture?",opts:["Azithromycin","Fluoroquinolones","Doxycycline","Trimethoprim"],a:1,cat:"Pharmacotherapy",exp:"Fluoroquinolones (ciprofloxacin, levofloxacin) carry an FDA black box warning for tendon rupture (especially Achilles tendon), peripheral neuropathy, and CNS effects."},
+{q:"The target INR range for a patient with atrial fibrillation on warfarin is:",opts:["1.0–1.5","2.0–3.0","3.0–4.0","1.5–2.0"],a:1,cat:"Pharmacotherapy",exp:"For atrial fibrillation, the therapeutic INR is 2.0-3.0. This range balances stroke prevention against bleeding risk. Higher ranges (2.5-3.5) are used for mechanical heart valves."},
+{q:"Which medication is considered a teratogen and should be avoided in pregnancy?",opts:["Methyldopa","Isotretinoin","Metoprolol","Metformin"],a:1,cat:"Pharmacotherapy",exp:"Isotretinoin (accutane) is a potent teratogen (pregnancy category X). It causes craniofacial, cardiac, thymic and CNS malformations. Strict iPLEDGE program is required in the US."},
+{q:"The standard treatment for H. pylori eradication includes:",opts:["Amoxicillin alone","Triple therapy: PPI + amoxicillin + clarithromycin","Metronidazole alone","H2-receptor antagonist only"],a:1,cat:"Pharmacotherapy",exp:"Standard triple therapy for H. pylori: PPI + clarithromycin + amoxicillin (or metronidazole) for 10-14 days. Bismuth quadruple therapy is an alternative, especially for penicillin allergy."},
+{q:"Vancomycin is the drug of choice for infections caused by:",opts:["MRSA","Pseudomonas aeruginosa","Klebsiella pneumoniae","Clostridium difficile (systemic)"],a:0,cat:"Pharmacotherapy",exp:"Vancomycin is DOC for MRSA infections including bacteremia, endocarditis, and SSTI. Note: for C. difficile colitis, oral vancomycin (not IV) or fidaxomicin is used."},
+{q:"Which antifungal acts by inhibiting ergosterol synthesis via lanosterol demethylase?",opts:["Amphotericin B","Azoles (fluconazole, itraconazole)","Caspofungin","Flucytosine"],a:1,cat:"Pharmacotherapy",exp:"Azole antifungals inhibit CYP51 (lanosterol 14α-demethylase), blocking ergosterol synthesis. Amphotericin B binds ergosterol directly; caspofungin inhibits β-glucan synthesis."},
+{q:"A patient with CrCl of 20 mL/min needs an antibiotic. Which requires the most significant dose adjustment?",opts:["Azithromycin","Gentamicin","Doxycycline","Rifampin"],a:1,cat:"Pharmacotherapy",exp:"Gentamicin (aminoglycoside) is almost entirely renally eliminated. Severe renal impairment (CrCl <30) requires significant dose reduction and extended interval dosing with serum level monitoring."},
+// CLINICAL SCIENCES
+{q:"Which laboratory value is most specific for renal function?",opts:["BUN","Serum creatinine","Cystatin C","Urine protein"],a:2,cat:"Clinical Sciences",exp:"Cystatin C is more specific for GFR than creatinine as it is less affected by muscle mass, diet, or age. However, serum creatinine (and eGFR derived from it) is most widely used clinically."},
+{q:"A patient with a serum potassium of 6.2 mEq/L has:",opts:["Hypokalemia","Hyperkalemia","Normal potassium","Pseudohyperkalemia"],a:1,cat:"Clinical Sciences",exp:"Normal serum potassium is 3.5-5.0 mEq/L. A value of 6.2 mEq/L is hyperkalemia, which can cause dangerous cardiac arrhythmias and requires prompt treatment."},
+{q:"Which ECG finding is characteristic of hyperkalemia?",opts:["Prolonged QT interval","Peaked T waves","ST depression","Delta waves"],a:1,cat:"Clinical Sciences",exp:"Hyperkalemia causes peaked (tall, narrow, symmetric) T waves as an early ECG finding. Progression: peaked T → prolonged PR → wide QRS → sine wave → VF/asystole."},
+{q:"A random blood glucose of 200 mg/dL or more in a patient with symptoms is diagnostic of:",opts:["Prediabetes","Diabetes mellitus","Metabolic syndrome","Impaired fasting glucose"],a:1,cat:"Clinical Sciences",exp:"ADA diagnostic criteria for DM: random glucose ≥200 mg/dL with classic symptoms, or fasting glucose ≥126 mg/dL, or 2-hr glucose ≥200 mg/dL on OGTT, or HbA1c ≥6.5%."},
+{q:"Which class of drugs should be avoided in patients with bilateral renal artery stenosis?",opts:["Calcium channel blockers","ACE inhibitors","Beta blockers","Thiazide diuretics"],a:1,cat:"Clinical Sciences",exp:"ACE inhibitors (and ARBs) are contraindicated in bilateral renal artery stenosis. They dilate the efferent arteriole, dropping glomerular filtration pressure and causing acute kidney injury."},
+{q:"The primary treatment for anaphylaxis is:",opts:["IV diphenhydramine","Epinephrine 1:1000 IM","IV hydrocortisone","Salbutamol nebulization"],a:1,cat:"Clinical Sciences",exp:"Epinephrine (adrenaline) 1:1000 IM (anterolateral thigh) is the first-line treatment for anaphylaxis. It reverses bronchospasm, vasodilation, and urticaria via α and β receptor activation."},
+{q:"Which value indicates a positive tuberculin skin test (TST) in an HIV-positive patient?",opts:["≥15 mm induration","≥5 mm induration","≥10 mm induration","Any induration"],a:1,cat:"Clinical Sciences",exp:"In HIV-positive patients, ≥5 mm induration is positive on TST due to their immune suppression. ≥10 mm is used for high-risk groups; ≥15 mm for low-risk general population."},
+{q:"Troponin I and T are elevated in:",opts:["Pulmonary embolism only","Acute myocardial infarction","Renal failure only","Liver disease"],a:1,cat:"Clinical Sciences",exp:"Troponins I and T are highly specific cardiac biomarkers elevated in AMI. Troponins are also elevated in myocarditis, PE (right heart strain), and CKD, but AMI is the classic indication."},
+{q:"A patient with asthma uses a short-acting beta-2 agonist more than 2 days per week. This is classified as:",opts:["Intermittent asthma","Mild persistent asthma","Moderate persistent asthma","Severe persistent asthma"],a:1,cat:"Clinical Sciences",exp:"NAEPP classification: SABA use >2 days/week (but not daily) = mild persistent asthma, requiring low-dose ICS as controller therapy."},
+{q:"Which test measures the average blood glucose over the past 2-3 months?",opts:["Fasting plasma glucose","HbA1c","Postprandial glucose","Fructosamine"],a:1,cat:"Clinical Sciences",exp:"HbA1c reflects the glycation of hemoglobin over the lifespan of RBCs (~120 days). It represents average blood glucose over 2-3 months and is used for diagnosis and monitoring of diabetes."},
+// PHARMACY LAW & ETHICS
+{q:"Under the Durham-Humphrey Amendment, which drugs require a prescription?",opts:["OTC drugs only","Habit-forming, toxic, or unsafe drugs requiring supervision","All compounded medications","Dietary supplements"],a:1,cat:"Pharmacy Law",exp:"The Durham-Humphrey Amendment (1951) defines drugs requiring a prescription: habit-forming (opioids), toxic drugs requiring professional supervision, and new drugs not proven safe for self-medication."},
+{q:"The Poison Prevention Packaging Act (PPPA) requires child-resistant containers for:",opts:["All OTC medications","Prescription drugs and certain OTC medications","Medical devices","Herbal supplements only"],a:1,cat:"Pharmacy Law",exp:"PPPA requires child-resistant packaging for most prescription and certain OTC medications. Exceptions include sublingual nitroglycerin, oral contraceptives, and patients who request easy-open caps."},
+{q:"A pharmacist suspects a patient is obtaining controlled substances from multiple providers. This is called:",opts:["Drug diversion","Doctor shopping","Formulary fraud","Off-label prescribing"],a:1,cat:"Pharmacy Law",exp:"Doctor shopping refers to a patient obtaining controlled substance prescriptions from multiple prescribers without their knowledge. It is a form of drug abuse/diversion and is illegal in most states."},
+{q:"Schedule II controlled substances require:",opts:["No special prescription requirements","A written prescription; no refills","Triplicate prescription only","Monthly refills allowed"],a:1,cat:"Pharmacy Law",exp:"Schedule II (e.g., oxycodone, Adderall, fentanyl) require a written or electronic prescription. No refills are permitted. Emergency verbal orders must be followed with a written Rx within 7 days."},
+{q:"The FDA Orange Book lists drugs that are:",opts:["Approved for OTC use only","Therapeutically equivalent to reference listed drugs","Investigational agents","Recalled medications"],a:1,cat:"Pharmacy Law",exp:"The FDA Orange Book (Approved Drug Products with Therapeutic Equivalence Evaluations) identifies generic drugs that are therapeutically equivalent to brand-name reference listed drugs, enabling substitution."},
+{q:"HIPAA's minimum necessary standard requires pharmacists to:",opts:["Share all patient information with healthcare team","Share only the minimum PHI needed for each purpose","Obtain written consent for every disclosure","Disclose PHI to any requesting party"],a:1,cat:"Pharmacy Law",exp:"HIPAA's minimum necessary standard requires covered entities to disclose only the minimum protected health information (PHI) necessary to accomplish the intended purpose of the use or disclosure."},
+{q:"Which of the following is NOT a valid reason to refuse to fill a prescription?",opts:["Prescriber lacks DEA registration","Patient cannot afford the medication","Drug-drug interaction risk","Prescription appears forged"],a:1,cat:"Pharmacy Law",exp:"Financial inability is not a legal reason to refuse dispensing (though it may be a practical barrier). Valid refusals include fraudulent Rx, safety concerns, inappropriate prescribing, or lack of DEA registration."},
+{q:"The Omnibus Budget Reconciliation Act (OBRA '90) requires pharmacists to:",opts:["Report all adverse drug events to FDA","Offer counseling to Medicaid patients and perform DUR","Bill insurance before dispensing","Verify all prescriptions online"],a:1,cat:"Pharmacy Law",exp:"OBRA '90 mandates that pharmacists offer prospective drug utilization review (DUR) and counseling to Medicaid patients. Most states have extended this requirement to all patients."},
+{q:"A drug with DEA Schedule V has:",opts:["Highest abuse potential","Lowest accepted abuse potential among controlled substances","No accepted medical use","High dependence liability"],a:1,cat:"Pharmacy Law",exp:"Schedule V drugs have the lowest abuse potential among controlled substances, accepted medical use, and limited physical or psychological dependence. Examples: cough preparations with <200mg codeine/100mL."},
+{q:"The combat methamphetamine epidemic act restricts the sale of:",opts:["All Schedule II stimulants","Pseudoephedrine and ephedrine products","Oxycodone and hydrocodone","Benzodiazepines"],a:1,cat:"Pharmacy Law",exp:"CMEA requires pseudoephedrine/ephedrine products to be kept behind the counter, purchasers must show ID and sign a logbook, with quantity limits of 3.6g/day and 9g/30 days."},
+// BIOPHARMACEUTICS
+{q:"The Biopharmaceutics Classification System (BCS) Class I drugs are:",opts:["Low solubility, high permeability","High solubility, high permeability","High solubility, low permeability","Low solubility, low permeability"],a:1,cat:"Biopharmaceutics",exp:"BCS Class I: high solubility + high permeability (e.g., metoprolol). These drugs are well absorbed and formulation usually does not limit bioavailability. IVIVC expected for IR formulations."},
+{q:"Which route of administration has 100% bioavailability by definition?",opts:["Oral","Sublingual","Intravenous","Intramuscular"],a:2,cat:"Biopharmaceutics",exp:"IV administration delivers drug directly into systemic circulation, bypassing all absorption processes. Bioavailability = 100% by definition and is used as the reference standard for F calculations."},
+{q:"In vitro dissolution testing is important because it:",opts:["Predicts only toxic concentrations","Correlates with in vivo drug absorption and bioavailability","Measures drug protein binding","Determines drug metabolism rate"],a:1,cat:"Biopharmaceutics",exp:"Dissolution testing predicts in vivo drug absorption (IVIVC). It is a quality control tool and a surrogate for bioavailability studies. BCS Class II drugs especially depend on dissolution for absorption."},
+{q:"An in vitro-in vivo correlation (IVIVC) is most useful for:",opts:["IV formulations","Oral extended-release formulations","Topical formulations","Inhalation products"],a:1,cat:"Biopharmaceutics",exp:"IVIVC is most applicable and established for oral extended-release formulations where dissolution rate is the rate-limiting step for absorption, allowing in vitro dissolution to predict in vivo performance."},
+{q:"Passive diffusion across biological membranes is facilitated by:",opts:["High drug charge and low lipophilicity","Unionized lipophilic drug form","Active transport carriers","High molecular weight"],a:1,cat:"Biopharmaceutics",exp:"Passive diffusion favors the unionized, lipophilic (non-polar) form of a drug. pH determines ionization fraction (Henderson-Hasselbalch). Lipophilic drugs partition into and cross lipid bilayers."},
+// TOXICOLOGY
+{q:"N-acetylcysteine (NAC) is the antidote for toxicity caused by:",opts:["Benzodiazepines","Acetaminophen","Opioids","Organophosphates"],a:1,cat:"Toxicology",exp:"NAC replenishes glutathione stores, conjugating the toxic acetaminophen metabolite NAPQI. It is most effective within 8-10 hours of overdose. Oral and IV formulations are used."},
+{q:"Naloxone reverses toxicity caused by:",opts:["Alcohol","Opioids","Benzodiazepines","Cocaine"],a:1,cat:"Toxicology",exp:"Naloxone is a competitive opioid receptor antagonist that rapidly reverses opioid-induced respiratory depression, sedation, and miosis. Duration ~30-90 min (shorter than most opioids)."},
+{q:"Which toxidrome is characterized by miosis, bradycardia, bronchospasm, and excessive secretions?",opts:["Sympathomimetic","Cholinergic","Anticholinergic","Opioid"],a:1,cat:"Toxicology",exp:"Cholinergic toxidrome (SLUDGE: Salivation, Lacrimation, Urination, Defecation, GI distress, Emesis; DUMBELS) results from organophosphate/carbamate poisoning or cholinergic drug excess."},
+{q:"The antidote for organophosphate poisoning is:",opts:["Physostigmine","Atropine and pralidoxime","Naloxone","Flumazenil"],a:1,cat:"Toxicology",exp:"Organophosphate poisoning is treated with high-dose atropine (muscarinic antagonist, controls secretions/bronchospasm) and pralidoxime (2-PAM, reactivates AChE if given early before 'aging')."},
+{q:"Iron toxicity is treated with:",opts:["EDTA chelation","Deferoxamine","Dimercaprol","Penicillamine"],a:1,cat:"Toxicology",exp:"Deferoxamine is a chelating agent specific for iron. It binds free iron forming ferrioxamine, which is renally excreted. Used for severe acute iron toxicity, monitoring urine color change (vin rosé)."},
+// STERILE COMPOUNDING
+{q:"USP 797 governs:",opts:["Non-sterile compounding","Sterile pharmaceutical compounding","Drug manufacturing","Dietary supplements"],a:1,cat:"Sterile Compounding",exp:"USP Chapter <797> sets standards for sterile pharmaceutical compounding including beyond-use dating, clean room requirements, personnel training, and environmental monitoring to prevent contamination."},
+{q:"The preferred disinfectant for ISO Class 5 cleanroom surfaces is:",opts:["Isopropyl alcohol 70%","Quaternary ammonium compounds","Bleach 10%","Hydrogen peroxide 3%"],a:0,cat:"Sterile Compounding",exp:"Sterile IPA 70% is the standard disinfectant for ISO 5 (laminar flow hood) surfaces. It effectively kills bacteria and fungi without leaving harmful residues that could contaminate preparations."},
+{q:"A HEPA filter removes particles of what size with 99.97% efficiency?",opts:["0.1 microns","0.3 microns","1.0 microns","5.0 microns"],a:1,cat:"Sterile Compounding",exp:"HEPA (High-Efficiency Particulate Air) filters remove ≥0.3 micron particles with 99.97% efficiency. This is the MPPS (most penetrating particle size) — smaller and larger particles are filtered even more efficiently."},
+{q:"Laminar airflow workbenches provide protection for:",opts:["The operator only","The preparation (product) only","Both operator and preparation","Neither operator nor preparation"],a:1,cat:"Sterile Compounding",exp:"Horizontal LAFWs (clean benches) protect only the product by directing HEPA-filtered air over the work surface. They do NOT protect the operator from hazardous drugs (BSCs are required for cytotoxics)."},
+{q:"The beyond-use date for a high-risk sterile preparation stored at room temperature is:",opts:["24 hours","48 hours","30 hours","72 hours"],a:0,cat:"Sterile Compounding",exp:"USP <797> BUD for high-risk CSPs: ≤24 hrs at room temp, ≤3 days at refrigerator temp, ≤45 days frozen. High-risk uses non-sterile ingredients or exposed non-ISO environments."},
+// PATIENT COUNSELING
+{q:"When counseling a patient starting warfarin, which dietary instruction is MOST important?",opts:["Avoid all vegetables","Maintain consistent vitamin K intake","Increase protein consumption","Avoid grapefruit juice"],a:1,cat:"Patient Counseling",exp:"Patients on warfarin should maintain consistent (not eliminate) vitamin K intake. Sudden increases in vitamin K (dark greens) decrease INR; sudden decreases raise INR. Grapefruit matters for some statins/CCBs."},
+{q:"A patient on metformin should be counseled to take it:",opts:["On an empty stomach","With food to reduce GI side effects","At bedtime only","With an antacid"],a:1,cat:"Patient Counseling",exp:"Metformin should be taken with meals to reduce GI side effects (nausea, diarrhea, abdominal discomfort). Extended-release formulation further reduces GI adverse effects."},
+{q:"Which inhaler technique instruction is correct for a metered-dose inhaler (MDI)?",opts:["Inhale rapidly and deeply","Inhale slowly and deeply after actuation","Hold the inhaler upside down","Exhale through the inhaler after use"],a:1,cat:"Patient Counseling",exp:"MDI technique: shake, exhale fully, place mouthpiece, begin slow deep inhalation, actuate, continue slow inhalation, hold breath 10 sec. Slow inhalation maximizes deposition; spacer improves technique."},
+{q:"A patient taking an MAOI should be warned to avoid foods high in:",opts:["Vitamin C","Tyramine","Calcium","Fiber"],a:1,cat:"Patient Counseling",exp:"MAOIs inhibit tyramine metabolism (normally broken down by MAO in gut). Tyramine-rich foods (aged cheese, cured meats, red wine) can cause hypertensive crisis. The 'cheese effect' is well-known."},
+{q:"Patients taking alendronate (Fosamax) should be advised to:",opts:["Take it with milk","Take it with a full glass of water and remain upright for 30 minutes","Take it at bedtime","Take it with food"],a:1,cat:"Patient Counseling",exp:"Bisphosphonates should be taken with 6-8 oz water, first thing in the morning, 30 min before food. Remain upright 30 min to prevent esophageal irritation/erosion. Take with any food reduces absorption ~60%."},
+// DRUG INTERACTIONS
+{q:"Grapefruit juice inhibits which enzyme, potentially increasing drug concentrations?",opts:["CYP2D6","CYP3A4","CYP2C9","CYP1A2"],a:1,cat:"Drug Interactions",exp:"Grapefruit juice irreversibly inhibits intestinal CYP3A4 (via furanocoumarins), increasing bioavailability of many drugs (statins, CCBs, cyclosporine). Effect can last >24 hours per glass consumed."},
+{q:"Which combination represents a clinically significant drug interaction with lithium?",opts:["Lithium + vitamin C","Lithium + NSAIDs","Lithium + acetaminophen","Lithium + antihistamines"],a:1,cat:"Drug Interactions",exp:"NSAIDs reduce renal prostaglandin synthesis, decreasing renal lithium excretion and increasing lithium serum levels by 25-50%. This can cause lithium toxicity (tremor, ataxia, confusion)."},
+{q:"St. John's Wort decreases the efficacy of many drugs by:",opts:["Inhibiting P-glycoprotein","Inducing CYP450 enzymes (especially CYP3A4)","Competing for protein binding","Blocking drug absorption"],a:1,cat:"Drug Interactions",exp:"St. John's Wort is a potent inducer of CYP3A4 and P-gp, reducing plasma levels of many drugs including warfarin, cyclosporine, oral contraceptives, and antiretrovirals."},
+{q:"The combination of a monoamine oxidase inhibitor with serotonergic drugs can cause:",opts:["Neuroleptic malignant syndrome","Serotonin syndrome","Anticholinergic toxidrome","Extrapyramidal symptoms"],a:1,cat:"Drug Interactions",exp:"Serotonin syndrome can occur when MAOIs are combined with SSRIs, TCAs, meperidine, tramadol, or triptans. Features: hyperthermia, clonus, agitation. Can be life-threatening."},
+{q:"Rifampin is known as a potent enzyme inducer. It primarily induces:",opts:["CYP1A2 only","Multiple CYP450 enzymes (CYP3A4, CYP2C9, CYP2C19) and P-gp","CYP2D6 only","Only phase II enzymes"],a:1,cat:"Drug Interactions",exp:"Rifampin induces CYP3A4, CYP2C9, CYP2C19, CYP2B6, and P-glycoprotein. This reduces concentrations of numerous drugs: oral contraceptives, warfarin, antiretrovirals, and many others."},
+// PHARMACOGENOMICS
+{q:"CYP2D6 poor metabolizers will have which effect on codeine therapy?",opts:["Increased morphine production","Decreased morphine production, reduced analgesia","Toxic morphine accumulation","No change in analgesia"],a:1,cat:"Pharmacogenomics",exp:"Codeine is a prodrug requiring CYP2D6 to convert to active morphine. Poor metabolizers (CYP2D6*4, *5) produce little morphine, resulting in reduced or absent analgesia. Ultra-rapid metabolizers risk toxicity."},
+{q:"Which genetic variant is associated with increased risk of Stevens-Johnson syndrome with carbamazepine?",opts:["CYP2C9*2","HLA-B*1502","TPMT*3","CYP2D6*6"],a:1,cat:"Pharmacogenomics",exp:"HLA-B*1502 allele, prevalent in Han Chinese and Southeast Asian populations, is strongly associated with carbamazepine-induced Stevens-Johnson syndrome/toxic epidermal necrolysis. FDA recommends testing."},
+{q:"TPMT (thiopurine methyltransferase) genotyping is recommended before starting:",opts:["Methotrexate","Azathioprine or 6-mercaptopurine","Cyclosporine","Mycophenolate"],a:1,cat:"Pharmacogenomics",exp:"TPMT converts azathioprine and 6-MP to inactive metabolites. Poor metabolizers (low TPMT activity) accumulate toxic thioguanine nucleotides, causing severe myelosuppression. Dose reduction required."},
+{q:"Warfarin dosing is influenced by polymorphisms in which genes?",opts:["CYP3A4 and ABCB1","CYP2C9 and VKORC1","CYP2D6 and CYP1A2","CYP2C19 and F2"],a:1,cat:"Pharmacogenomics",exp:"CYP2C9 metabolizes S-warfarin. VKORC1 encodes warfarin's target enzyme. Polymorphisms in both genes predict warfarin dose requirements, explaining ~35% of dose variability."},
+// MICROBIOLOGY
+{q:"Gram-positive bacteria have a cell wall that is:",opts:["Rich in lipopolysaccharide","Thick peptidoglycan layer, no outer membrane","Thin peptidoglycan with outer membrane","Composed only of teichoic acids"],a:1,cat:"Microbiology",exp:"Gram-positive bacteria have a thick peptidoglycan cell wall (20-80nm) without an outer lipid membrane, causing them to retain crystal violet stain (appearing purple). They lack the LPS endotoxin of gram-negatives."},
+{q:"Methicillin-resistant Staphylococcus aureus (MRSA) resistance is mediated by:",opts:["Beta-lactamase production","Altered penicillin-binding protein (PBP2a) encoded by mecA gene","Efflux pumps","Porin channel mutations"],a:1,cat:"Microbiology",exp:"MRSA resistance is due to PBP2a (encoded by mecA gene), which has low affinity for all beta-lactam antibiotics. This means all beta-lactams are ineffective, unlike beta-lactamase-producing strains."},
+{q:"Which organism is responsible for the majority of community-acquired urinary tract infections?",opts:["Klebsiella pneumoniae","Escherichia coli","Enterococcus faecalis","Pseudomonas aeruginosa"],a:1,cat:"Microbiology",exp:"E. coli accounts for 80-85% of community-acquired UTIs. It has virulence factors (fimbriae, P-pili) enabling uroepithelial adhesion. First-line treatment: nitrofurantoin, TMP-SMX, or fosfomycin."},
+{q:"Clostridium difficile causes diarrhea primarily through:",opts:["Direct tissue invasion","Exotoxins A and B disrupting colonic epithelium","Endotoxin release","Bacteremia"],a:1,cat:"Microbiology",exp:"C. difficile toxin A (enterotoxin) and toxin B (cytotoxin) damage colonic epithelium, disrupt tight junctions, and cause pseudomembranous colitis. Triggered by antibiotic-associated dysbiosis."},
+{q:"Which antiviral drug is used for influenza prophylaxis and treatment?",opts:["Acyclovir","Oseltamivir (Tamiflu)","Ribavirin","Ganciclovir"],a:1,cat:"Microbiology",exp:"Oseltamivir (Tamiflu) is a neuraminidase inhibitor active against influenza A and B. It reduces duration by ~1 day if started within 48 hrs. Also used for prophylaxis in high-risk contacts."},
+// CALCULATIONS
+{q:"A 70 kg patient requires dopamine at 5 mcg/kg/min. The available solution is 400 mg in 250 mL D5W. What is the infusion rate in mL/hr?",opts:["10.5 mL/hr","13.1 mL/hr","26.3 mL/hr","5.25 mL/hr"],a:1,cat:"Calculations",exp:"Concentration = 400mg/250mL = 1.6 mg/mL = 1600 mcg/mL. Dose = 5 mcg/kg/min × 70 kg = 350 mcg/min = 21000 mcg/hr. Rate = 21000/1600 = 13.125 mL/hr ≈ 13.1 mL/hr."},
+{q:"A pharmacist needs to prepare 500 mL of a 0.9% NaCl solution from a 23.4% NaCl concentrate. How much concentrate is needed?",opts:["10.9 mL","19.2 mL","38.5 mL","5.4 mL"],a:1,cat:"Calculations",exp:"Using C1V1 = C2V2: 23.4% × V1 = 0.9% × 500 mL. V1 = (0.9 × 500)/23.4 = 450/23.4 = 19.23 mL ≈ 19.2 mL. Add to SWFI to make 500 mL."},
+{q:"The half-life of a drug is 6 hours. How long will it take to reach 97% elimination?",opts:["12 hours","24 hours","30 hours","36 hours"],a:2,cat:"Calculations",exp:"Each half-life eliminates 50%. After 5 half-lives: 97% eliminated (50%→75%→87.5%→93.75%→96.875%). 5 × 6 = 30 hours. As a rule, steady state is also reached after ~5 half-lives."},
+{q:"A 150-lb patient requires a loading dose of 15 mg/kg IV. How many mg should be administered?",opts:["1,023 mg","1,021 mg","2,250 mg","682 mg"],a:0,cat:"Calculations",exp:"Convert: 150 lb ÷ 2.2 = 68.18 kg. Dose = 15 mg/kg × 68.18 kg = 1022.7 mg ≈ 1,023 mg. Always convert lbs to kg (divide by 2.2) before calculating weight-based doses."},
+{q:"Alligation medial is used to:",opts:["Find volume needed for dilution","Calculate the mean concentration when mixing solutions of different strengths","Determine drug expiry","Calculate clearance"],a:1,cat:"Calculations",exp:"Alligation medial calculates the resulting concentration when mixing two or more preparations of different strengths in known amounts. Alligation alternate finds proportions to achieve a desired middle concentration."},
+// IMMUNOLOGY
+{q:"Which immunoglobulin is primarily responsible for long-term humoral immunity?",opts:["IgM","IgG","IgA","IgE"],a:1,cat:"Immunology",exp:"IgG is the most abundant serum immunoglobulin and provides long-term immunity after infection or vaccination. It also crosses the placenta, providing neonatal immunity (passive immunization)."},
+{q:"The mechanism of action of monoclonal antibodies ending in '-mab' is:",opts:["Small molecule enzyme inhibition","Targeted protein binding and neutralization","Gene silencing","Receptor activation only"],a:1,cat:"Immunology",exp:"Monoclonal antibodies bind specific protein targets with high specificity. They can neutralize cytokines (adalimumab-TNFα), block receptors (cetuximab-EGFR), or opsonize cancer cells (rituximab-CD20)."},
+{q:"Live attenuated vaccines should be avoided in:",opts:["Healthy young adults","Immunocompromised patients","Elderly patients","Patients with penicillin allergy"],a:1,cat:"Immunology",exp:"Live attenuated vaccines (MMR, varicella, yellow fever, LAIV) are contraindicated in immunocompromised patients (chemotherapy, HIV CD4<200, high-dose steroids) due to risk of vaccine-strain disease."},
+{q:"TNF-alpha inhibitors (etanercept, adalimumab) are used in:",opts:["Bacterial infections","Rheumatoid arthritis and other inflammatory conditions","Type 1 diabetes","Anaphylaxis"],a:1,cat:"Immunology",exp:"TNF-α inhibitors are biologics used in RA, psoriasis, psoriatic arthritis, ankylosing spondylitis, Crohn's disease. They increase risk of serious infections (especially TB reactivation - screen first)."},
+// ENDOCRINOLOGY
+{q:"Insulin glargine is characterized by:",opts:["Short action with peak effect","Long-acting, peakless, 24-hour duration","Intermediate action with peaks","Ultra-rapid action"],a:1,cat:"Endocrinology",exp:"Insulin glargine (Lantus) is a long-acting basal insulin with ~24-hour duration and no pronounced peak. It forms microprecipitates at SC injection site, providing slow sustained release."},
+{q:"Which thyroid function test is most sensitive for diagnosing primary hypothyroidism?",opts:["Free T4","Free T3","TSH","Total T4"],a:2,cat:"Endocrinology",exp:"TSH is the most sensitive test for primary thyroid disease. Elevated TSH with low Free T4 = primary hypothyroidism. The pituitary responds first to falling T4, making TSH the earliest marker."},
+{q:"Which medication can cause hypothyroidism as a side effect?",opts:["Metformin","Amiodarone","Lisinopril","Metoprolol"],a:1,cat:"Endocrinology",exp:"Amiodarone contains ~37% iodine by weight and can cause hypothyroidism (and hyperthyroidism). It also inhibits T4→T3 conversion. Thyroid function should be monitored every 6 months."},
+{q:"Cushing's syndrome is characterized by excess:",opts:["Aldosterone","Cortisol","Thyroid hormone","Insulin"],a:1,cat:"Endocrinology",exp:"Cushing's syndrome results from excess cortisol (endogenous or exogenous steroid use). Features: central obesity, moon face, buffalo hump, purple striae, hypertension, hyperglycemia, osteoporosis."},
+// NEUROLOGY
+{q:"The mechanism of action of levodopa in Parkinson's disease is:",opts:["Direct dopamine receptor agonism","Precursor converted to dopamine in the CNS","MAO-B inhibition","COMT inhibition"],a:1,cat:"Neurology",exp:"Levodopa is a dopamine precursor that crosses the BBB and is decarboxylated to dopamine by DOPA decarboxylase in the striatum. Combined with carbidopa to prevent peripheral conversion and side effects."},
+{q:"Which antiepileptic drug is first-line for absence seizures?",opts:["Phenytoin","Ethosuximide","Carbamazepine","Phenobarbital"],a:1,cat:"Neurology",exp:"Ethosuximide is first-line for pure absence seizures. It blocks T-type calcium channels in thalamic neurons, interrupting the 3Hz spike-wave discharges. Valproate is also effective but has more side effects."},
+{q:"Which class of drugs is first-line for acute migraine treatment?",opts:["Opioids","Triptans (serotonin 5-HT1B/1D agonists)","NSAIDs for all patients","Prophylactic beta blockers"],a:1,cat:"Neurology",exp:"Triptans (sumatriptan, zolmitriptan) are specific for migraine. They are 5-HT1B/1D agonists causing cranial vasoconstriction, inhibiting trigeminal nociceptive transmission. NSAIDs used for mild attacks."},
+{q:"Memantine is used in Alzheimer's disease and acts as:",opts:["Acetylcholinesterase inhibitor","NMDA receptor antagonist","MAO-B inhibitor","Dopamine agonist"],a:1,cat:"Neurology",exp:"Memantine is a low-affinity, non-competitive NMDA receptor antagonist that reduces pathological glutamate excitotoxicity in moderate-severe Alzheimer's. Often combined with AChE inhibitors."},
+// CARDIOLOGY
+{q:"The drug of choice for acute rate control in atrial fibrillation with rapid ventricular response is:",opts:["Digoxin","IV metoprolol or diltiazem","Amiodarone","Flecainide"],a:1,cat:"Cardiology",exp:"IV beta-blockers (metoprolol) or non-dihydropyridine CCBs (diltiazem, verapamil) are first-line for acute rate control in AF with RVR. Digoxin is slow-acting; amiodarone is used for rhythm control."},
+{q:"ACLS guidelines recommend which initial drug for symptomatic bradycardia?",opts:["Amiodarone","Atropine 0.5 mg IV","Adenosine","Epinephrine infusion"],a:1,cat:"Cardiology",exp:"Atropine 0.5 mg IV is the first-line drug for symptomatic bradycardia in ACLS. It blocks vagal tone, increasing heart rate. May repeat every 3-5 min (max 3 mg). Transcutaneous pacing if atropine fails."},
+{q:"Acute myocardial infarction management (STEMI) includes all of the following EXCEPT:",opts:["Aspirin","Nitrates to all patients","Primary PCI within 90 minutes","Anticoagulation"],a:1,cat:"Cardiology",exp:"Nitrates are generally used in STEMI for chest pain/hypertension but are CONTRAINDICATED in hypotension (<90 mmHg), severe bradycardia, right ventricular infarction, or recent PDE-5 inhibitor use."},
+{q:"Long QT syndrome increases risk of:",opts:["Atrial fibrillation","Torsades de Pointes (polymorphic VT)","Complete heart block","Ventricular fibrillation only"],a:1,cat:"Cardiology",exp:"Prolonged QT interval (>470ms women, >450ms men) predisposes to torsades de pointes (TdP), a form of polymorphic VT that can degenerate to VF. Many drugs prolong QT (ondansetron, haloperidol, azithromycin)."},
+// PULMONOLOGY
+{q:"Which inhaled drug is preferred for long-term asthma control?",opts:["Short-acting beta-2 agonists (SABA)","Inhaled corticosteroids (ICS)","Long-acting anticholinergics","Leukotriene receptor antagonists"],a:1,cat:"Pulmonology",exp:"Inhaled corticosteroids (fluticasone, budesonide, beclomethasone) are the cornerstone of persistent asthma management. They reduce airway inflammation, hyperresponsiveness, and exacerbation frequency."},
+{q:"Tiotropium's mechanism of action in COPD is:",opts:["Beta-2 agonism","Long-acting muscarinic antagonism (LAMA)","Phosphodiesterase inhibition","Leukotriene inhibition"],a:1,cat:"Pulmonology",exp:"Tiotropium is a LAMA (long-acting muscarinic antagonist) that blocks M3 receptors in airway smooth muscle, causing bronchodilation lasting ≥24 hours. It is a cornerstone maintenance therapy for COPD."},
+{q:"Which finding on spirometry is most characteristic of obstructive lung disease?",opts:["Decreased FEV1/FVC ratio","Decreased FVC with normal FEV1/FVC","Increased TLC","Normal DLCO"],a:0,cat:"Pulmonology",exp:"Obstructive disease (asthma, COPD) = decreased FEV1/FVC ratio (<0.70). In restrictive disease (pulmonary fibrosis), FVC decreases but FEV1/FVC ratio is normal or elevated."},
+// GASTROENTEROLOGY
+{q:"Proton pump inhibitors (PPIs) work by:",opts:["H2-receptor blockade","Irreversible inhibition of the H+/K+ ATPase proton pump","Neutralizing gastric acid","Coating the gastric mucosa"],a:1,cat:"Gastroenterology",exp:"PPIs (omeprazole, lansoprazole) irreversibly inhibit the H⁺/K⁺-ATPase (proton pump) in gastric parietal cells, providing the most potent acid suppression. They require activation at acid pH and should be taken before meals."},
+{q:"5-ASA agents (mesalamine) are primarily used for:",opts:["Crohn's disease with small bowel involvement","Ulcerative colitis","Irritable bowel syndrome","Peptic ulcer disease"],a:1,cat:"Gastroenterology",exp:"5-ASA (aminosalicylates) are first-line for mild-moderate ulcerative colitis. They act topically in the colon (anti-inflammatory via NF-κB inhibition). Less effective in Crohn's, especially with small bowel disease."},
+{q:"The Maddrey discriminant function >32 in alcoholic hepatitis indicates:",opts:["Spontaneous recovery likely","Severe disease, benefit from corticosteroids","Need for immediate transplant","Mild disease only"],a:1,cat:"Gastroenterology",exp:"Maddrey's discriminant function (DF) = 4.6 × (PT-control) + bilirubin(mg/dL). DF >32 = severe alcoholic hepatitis with 30-day mortality ~35%. Prednisolone 40 mg/day is recommended if no contraindications."},
+// PSYCHIATRY
+{q:"First-line pharmacotherapy for generalized anxiety disorder (GAD) is:",opts:["Benzodiazepines","SSRIs or SNRIs","Buspirone only","Tricyclic antidepressants"],a:1,cat:"Psychiatry",exp:"SSRIs (escitalopram, paroxetine) and SNRIs (venlafaxine, duloxetine) are first-line long-term treatment for GAD. Buspirone is an option. Benzodiazepines for short-term relief only (dependence risk)."},
+{q:"Lithium toxicity is most likely at serum levels above:",opts:["0.5 mEq/L","1.5 mEq/L","2.5 mEq/L","1.0 mEq/L"],a:1,cat:"Psychiatry",exp:"Lithium therapeutic range is 0.6-1.2 mEq/L (acute: 0.8-1.2). Toxicity signs appear >1.5 mEq/L (tremor, GI), severe toxicity >2.0 mEq/L (ataxia, confusion, seizures). Narrow therapeutic index requires monitoring."},
+{q:"Clozapine is unique among antipsychotics because it:",opts:["Has no extrapyramidal side effects and is effective in treatment-resistant schizophrenia","Causes tardive dyskinesia more than others","Is used only for acute agitation","Is the first-line antipsychotic"],a:0,cat:"Psychiatry",exp:"Clozapine is reserved for treatment-resistant schizophrenia and has the lowest risk of EPS/TD. However, it causes agranulocytosis (~1%), requiring mandatory ANC monitoring via the REMS program."},
+{q:"Which antidepressant causes the most significant weight gain?",opts:["Sertraline","Mirtazapine","Bupropion","Fluoxetine"],a:1,cat:"Psychiatry",exp:"Mirtazapine (NaSSA) causes significant weight gain due to H1 antihistamine effects and 5-HT2C antagonism. Bupropion is associated with weight loss/neutral effect. Sertraline is relatively weight-neutral."},
+// ONCOLOGY
+{q:"Methotrexate inhibits which enzyme critical to cancer cell replication?",opts:["Topoisomerase II","Dihydrofolate reductase (DHFR)","Thymidylate synthase directly","DNA polymerase"],a:1,cat:"Oncology",exp:"Methotrexate competitively inhibits DHFR, blocking conversion of dihydrofolate to tetrahydrofolate. This depletes thymidylate and purine precursors, halting DNA synthesis. Leucovorin is used for rescue."},
+{q:"Which chemotherapy agent is associated with hemorrhagic cystitis?",opts:["Vincristine","Cyclophosphamide","Methotrexate","Doxorubicin"],a:1,cat:"Oncology",exp:"Cyclophosphamide is metabolized to acrolein (urotoxic metabolite) causing hemorrhagic cystitis. Mesna is given prophylactically to bind acrolein in the bladder. Aggressive hydration also helps."},
+{q:"Trastuzumab (Herceptin) targets:",opts:["VEGF","HER2/neu (ErbB2) receptor","CD20","BCR-ABL"],a:1,cat:"Oncology",exp:"Trastuzumab is a monoclonal antibody targeting HER2/neu overexpressed in ~20% of breast cancers. Testing for HER2 overexpression is required before use. Side effect: cardiotoxicity (monitor LVEF)."},
+{q:"Imatinib (Gleevec) is used for CML and acts by:",opts:["Alkylating DNA","Tyrosine kinase inhibition (BCR-ABL)","Topoisomerase I inhibition","Microtubule stabilization"],a:1,cat:"Oncology",exp:"Imatinib inhibits BCR-ABL tyrosine kinase (the product of the Philadelphia chromosome t(9;22)). It revolutionized CML treatment, achieving >90% major cytogenetic response. Also targets c-KIT and PDGFR."},
+// RENAL
+{q:"The Cockcroft-Gault equation estimates:",opts:["Drug volume of distribution","Creatinine clearance (renal function)","Drug half-life","Protein binding"],a:1,cat:"Renal Pharmacology",exp:"CrCl = [(140-age) × weight(kg)] / [72 × SCr] × 0.85 if female. It estimates glomerular filtration rate from serum creatinine, age, weight, and sex. Used for drug dosing adjustments in renal impairment."},
+{q:"Which drug requires dose reduction when eGFR falls below 30 mL/min/1.73m²?",opts:["Atorvastatin","Metformin","Amlodipine","Losartan"],a:1,cat:"Renal Pharmacology",exp:"Metformin is contraindicated when eGFR <30 mL/min/1.73m² due to lactic acidosis risk from drug accumulation. Use with caution at 30-45 (reduce dose). Atorvastatin and amlodipine are primarily hepatically eliminated."},
+{q:"Patients on ACE inhibitors may develop hyperkalemia because ACE inhibitors:",opts:["Increase potassium intake","Reduce aldosterone levels, decreasing renal K+ excretion","Directly inhibit K+ excretion at distal tubule","Block K+ uptake in cells"],a:1,cat:"Renal Pharmacology",exp:"ACE inhibitors reduce angiotensin II production, decreasing aldosterone secretion. Aldosterone normally promotes Na+ reabsorption and K+ excretion in the collecting duct. Less aldosterone = K+ retention = hyperkalemia."},
+// NUTRITION
+{q:"Thiamine deficiency is associated with which clinical syndrome in alcoholics?",opts:["Pellagra","Wernicke-Korsakoff syndrome","Scurvy","Beriberi only"],a:1,cat:"Clinical Nutrition",exp:"Wernicke-Korsakoff syndrome (WKS) results from thiamine (B1) deficiency, common in alcoholics. Wernicke's encephalopathy: confusion, ataxia, ophthalmoplegia. Korsakoff's: anterograde amnesia, confabulation."},
+{q:"Which vitamin requires intrinsic factor for absorption?",opts:["Vitamin C","Vitamin B12 (cobalamin)","Vitamin B6","Folic acid"],a:1,cat:"Clinical Nutrition",exp:"Vitamin B12 binds intrinsic factor (secreted by gastric parietal cells) for absorption in the terminal ileum. Lack of IF (pernicious anemia, gastrectomy) causes B12 deficiency and megaloblastic anemia."},
+{q:"Folic acid supplementation is recommended in pregnancy primarily to prevent:",opts:["Iron deficiency anemia","Neural tube defects","Gestational diabetes","Placenta previa"],a:1,cat:"Clinical Nutrition",exp:"Folic acid (400-800 mcg/day) before conception and in early pregnancy reduces neural tube defect (spina bifida, anencephaly) risk by ~70%. Folate is critical for neural tube closure at 4-6 weeks gestation."},
+// GERIATRICS
+{q:"The Beers Criteria identifies medications that are potentially inappropriate for:",opts:["Pediatric patients","Older adults (≥65 years)","Pregnant women","Renally impaired patients"],a:1,cat:"Geriatrics",exp:"Beers Criteria (AGS) lists potentially inappropriate medications for adults ≥65 due to higher risk of adverse effects in elderly (altered PK/PD, polypharmacy, increased sensitivity). Updated every 3 years."},
+{q:"Which class of drugs from the Beers List is associated with fall risk in elderly patients?",opts:["ACE inhibitors","Benzodiazepines and sleep medications","Statins","ACE inhibitors and ARBs"],a:1,cat:"Geriatrics",exp:"Benzodiazepines, sleep aids (zolpidem), and anticholinergics are strongly associated with falls, fractures, and cognitive impairment in elderly. They cause sedation, psychomotor impairment, and orthostatic hypotension."},
+// PEDIATRICS
+{q:"Which analgesic should be avoided in children with viral illnesses due to risk of Reye's syndrome?",opts:["Acetaminophen","Aspirin","Ibuprofen","Codeine"],a:1,cat:"Pediatrics",exp:"Aspirin is contraindicated in children (<12-16 years) with viral illnesses (flu, varicella) due to Reye's syndrome risk (acute encephalopathy + fatty liver). Acetaminophen or ibuprofen are safe alternatives."},
+{q:"What is the preferred antipyretic for febrile children under 6 months of age?",opts:["Ibuprofen","Acetaminophen","Aspirin","Naproxen"],a:1,cat:"Pediatrics",exp:"Acetaminophen is safe for infants from 2 months old. Ibuprofen is not recommended under 6 months due to insufficient safety data and renal concerns. Aspirin is contraindicated in children."},
+{q:"Albuterol dosing in pediatrics is calculated based on:",opts:["Surface area only","Weight (mg/kg) for nebulization; fixed dose for MDI","Age only","Height and weight combined"],a:1,cat:"Pediatrics",exp:"Albuterol nebulization in children: 0.15 mg/kg (min 2.5 mg) every 20 min × 3 for severe acute asthma. MDI with spacer uses fixed doses by age/weight. Weight-based dosing ensures appropriate nebulizer dosing."},
+// ADDITIONAL PHARMACOLOGY
+{q:"The 'cheese effect' is associated with which drug class?",opts:["SSRIs","MAO inhibitors","Beta-blockers","Calcium channel blockers"],a:1,cat:"Pharmacology",exp:"MAOIs inhibit gut/liver MAO-A that normally breaks down dietary tyramine. Eating tyramine-rich foods (aged cheese, wine, cured meats) causes excessive norepinephrine release, causing hypertensive crisis."},
+{q:"Sildenafil's mechanism of action involves:",opts:["Increasing cGMP degradation","Inhibiting PDE-5, increasing cGMP and smooth muscle relaxation","Directly activating NO synthesis","Blocking endothelin receptors"],a:1,cat:"Pharmacology",exp:"Sildenafil inhibits PDE-5 (phosphodiesterase type 5), preventing cGMP breakdown in vascular smooth muscle. Increased cGMP → relaxation → vasodilation. Used for ED and pulmonary arterial hypertension."},
+{q:"Which antihypertensive is preferred during pregnancy?",opts:["ACE inhibitors","Methyldopa or labetalol","Beta-blockers only","Calcium channel blockers only"],a:1,cat:"Pharmacology",exp:"Methyldopa is the drug of choice for chronic hypertension in pregnancy (longest safety record). Labetalol and nifedipine are also used. ACE inhibitors/ARBs are teratogenic (fetal renal toxicity) — avoid."},
+{q:"The mechanism of action of aminoglycosides includes:",opts:["Cell wall synthesis inhibition","Irreversible binding to 30S ribosomal subunit causing misreading","DNA gyrase inhibition","Cell membrane disruption"],a:1,cat:"Pharmacology",exp:"Aminoglycosides (gentamicin, tobramycin) bind irreversibly to the 30S ribosomal subunit, causing mRNA misreading and synthesis of abnormal/dysfunctional proteins. Concentration-dependent killing with PAE."},
+{q:"Which benzodiazepine is preferred in hepatic impairment due to no active metabolites?",opts:["Diazepam","Lorazepam","Chlordiazepoxide","Flurazepam"],a:1,cat:"Pharmacology",exp:"Lorazepam (and oxazepam, temazepam - the LOT drugs) undergo direct glucuronidation and have no active metabolites. Safe in liver disease. Diazepam has active metabolite desmethyldiazepam with long t½."},
+{q:"Naltrexone is approved for treatment of:",opts:["Opioid overdose reversal","Opioid and alcohol use disorders (long-term)","Nicotine dependence","Benzodiazepine withdrawal"],a:1,cat:"Pharmacology",exp:"Naltrexone (oral, IM monthly) blocks opioid receptors long-term, reducing euphoria from opioids and decreasing cravings. It is FDA-approved for opioid use disorder and alcohol use disorder."},
+{q:"Hydroxychloroquine is used for which condition?",opts:["Bacterial pneumonia","Rheumatoid arthritis and lupus","Acute gout","Osteoporosis"],a:1,cat:"Pharmacology",exp:"Hydroxychloroquine (antimalarial/DMARD) is used in RA and SLE. It modulates immune response, reduces inflammation, and has low toxicity profile. Notable side effect: retinal toxicity (regular eye exams required)."},
+{q:"Tamoxifen's mechanism in breast cancer treatment is:",opts:["Direct cytotoxicity","Selective estrogen receptor modulator (SERM) — blocks estrogen in breast","Aromatase inhibition","Progesterone receptor antagonism"],a:1,cat:"Pharmacology",exp:"Tamoxifen is a SERM — it competes with estrogen at ER in breast tissue (antagonist), reducing proliferation of ER+ breast cancer cells. It acts as agonist in bone and uterus. Side effects: uterine cancer, DVT."},
+{q:"Which drug used for alcohol withdrawal works by enhancing GABA activity?",opts:["Naltrexone","Benzodiazepines","Disulfiram","Acamprosate"],a:1,cat:"Pharmacology",exp:"Benzodiazepines (chlordiazepoxide, lorazepam, diazepam) enhance GABA-A receptor activity, cross-tolerant with alcohol. They prevent/treat AWS including seizures and delirium tremens."},
+{q:"The mechanism of probenecid involves:",opts:["Inhibiting xanthine oxidase","Blocking urate reabsorption in renal proximal tubule","Increasing renal blood flow","Inhibiting prostaglandin synthesis"],a:1,cat:"Pharmacology",exp:"Probenecid is uricosuric — it blocks URAT1 transporter, preventing uric acid reabsorption in the proximal tubule, increasing urinary uric acid excretion. Used for gout prevention. Maintain high fluid intake."},
+// DRUG INFORMATION
+{q:"The primary literature source for evidence-based drug information is:",opts:["Micromedex","Peer-reviewed clinical trial publications","Package inserts","UpToDate"],a:1,cat:"Drug Information",exp:"Primary literature (original research papers in peer-reviewed journals) is the highest quality evidence source. Secondary (Micromedex, UpToDate) and tertiary (textbooks, package inserts) sources are derived from primary literature."},
+{q:"Which study design provides the strongest evidence for a drug's efficacy?",opts:["Cohort study","Randomized controlled trial (RCT)","Case-control study","Expert opinion"],a:1,cat:"Drug Information",exp:"Randomized controlled trials with blinding are the gold standard for evidence. Randomization minimizes confounding; control group provides comparison; blinding reduces bias. Level I-A evidence in EBM hierarchy."},
+{q:"Number Needed to Treat (NNT) is calculated as:",opts:["Absolute risk × control event rate","1 / Absolute Risk Reduction","Relative risk × baseline risk","Odds ratio – 1"],a:1,cat:"Drug Information",exp:"NNT = 1/ARR (absolute risk reduction). Lower NNT = more effective treatment. ARR = control event rate – treatment event rate. A NNT of 1 means treat 1 patient to prevent 1 event."},
+// MISCELLANEOUS FPGEE TOPICS
+{q:"Which electrolyte imbalance can be caused by thiazide diuretics?",opts:["Hyperkalemia","Hypokalemia and hyponatremia","Hypernatremia","Hypercalcemia only"],a:1,cat:"Clinical Sciences",exp:"Thiazides cause hypokalemia (increased K+ excretion) and hyponatremia. They also cause hypercalcemia (decreased Ca2+ excretion – useful in hypercalciuria). Hyperglycemia and hyperuricemia also occur."},
+{q:"Osmoregulation is primarily controlled by:",opts:["Aldosterone","ADH (vasopressin) and thirst","Atrial natriuretic peptide","RAAS alone"],a:1,cat:"Physiology",exp:"ADH/vasopressin maintains serum osmolality (normal 280-295 mOsm/kg). High osmolality → ADH release → water retention. Thirst drives intake. Diabetes insipidus = ADH deficiency causing massive dilute urine."},
+{q:"Which drug class is contraindicated in patients with HFrEF (heart failure with reduced ejection fraction)?",opts:["ACE inhibitors","Non-dihydropyridine calcium channel blockers (verapamil, diltiazem)","Beta-blockers","Spironolactone"],a:1,cat:"Cardiology",exp:"Non-DHP CCBs (verapamil, diltiazem) are contraindicated in HFrEF as they worsen cardiac function. DHP CCBs (amlodipine) are acceptable. ACE inhibitors, beta-blockers, and mineralocorticoid antagonists are beneficial."},
+{q:"The MOST important counseling point for patients starting isotretinoin is:",opts:["Take with food only","Mandatory iPLEDGE program enrollment and absolute contraception requirements","Use sunscreen","Avoid alcohol while on drug"],a:1,cat:"Patient Counseling",exp:"Isotretinoin is Category X. The iPLEDGE REMS requires: monthly negative pregnancy tests, two forms of contraception, and counseling. Prescribers, pharmacies, and patients must all be registered."},
+{q:"QT prolongation is a serious adverse effect of which antipsychotic?",opts:["Aripiprazole","Haloperidol and ziprasidone","Clozapine","Quetiapine at normal doses"],a:1,cat:"Pharmacology",exp:"Ziprasidone has the greatest QT prolongation risk among atypical antipsychotics. Haloperidol (IV especially) prolongs QT. Aripiprazole has minimal QT effects. All patients should have baseline ECG if at risk."},
+{q:"Which antibiotic class inhibits bacterial protein synthesis at the 50S ribosomal subunit?",opts:["Aminoglycosides","Macrolides and clindamycin","Fluoroquinolones","Tetracyclines"],a:1,cat:"Pharmacology",exp:"50S inhibitors: macrolides (erythromycin, azithromycin), lincosamides (clindamycin), chloramphenicol, linezolid, streptogramins. 30S inhibitors: aminoglycosides, tetracyclines. ECLA = 50S inhibitors mnemonic."},
+{q:"Heparin-induced thrombocytopenia (HIT) is caused by:",opts:["Bone marrow suppression","IgG antibody against PF4-heparin complex causing platelet activation","Direct platelet destruction","Warfarin effect on platelets"],a:1,cat:"Pharmacology",exp:"HIT is caused by IgG antibodies against PF4-heparin complexes that activate platelets via FcγRIIa, causing thrombocytopenia AND paradoxical thrombosis. Stop heparin; use argatroban or fondaparinux."},
+{q:"Which of the following is an example of a narrow therapeutic index drug requiring TDM?",opts:["Amoxicillin","Theophylline","Azithromycin","Ibuprofen"],a:1,cat:"Pharmacokinetics",exp:"Theophylline has a narrow TI (therapeutic range 5-15 mcg/mL for asthma). Levels >20 mcg/mL cause toxicity (seizures, arrhythmias). TDM is essential. Other NTI drugs: digoxin, vancomycin, aminoglycosides, lithium."},
+{q:"Peripheral edema is a common side effect of which antihypertensive class?",opts:["ACE inhibitors","Dihydropyridine calcium channel blockers","Thiazide diuretics","Beta-blockers"],a:1,cat:"Pharmacology",exp:"DHP CCBs (amlodipine, nifedipine) cause peripheral edema due to arteriolar vasodilation without matching venodilation, increasing capillary hydrostatic pressure. Edema is dose-dependent and not cardiac in origin."},
+{q:"The antidote for heparin overdose is:",opts:["Vitamin K","Protamine sulfate","Fresh frozen plasma","Phytonadione"],a:1,cat:"Toxicology",exp:"Protamine sulfate (1 mg neutralizes 100 units heparin) is the antidote for heparin overdose. It's a cationic protein that forms an ionic complex with anionic heparin, neutralizing anticoagulant activity."},
+{q:"Warfarin overdose with serious bleeding is treated with:",opts:["Protamine sulfate","Vitamin K IV and 4-factor PCC or FFP","Platelet transfusion","Aminocaproic acid"],a:1,cat:"Toxicology",exp:"Serious warfarin bleeding: IV Vitamin K (phytonadione) 5-10 mg PLUS 4-factor PCC (Kcentra) for immediate reversal. FFP is an alternative if PCC unavailable. PCC works within minutes vs hours for Vit K."},
+{q:"Which cytochrome P450 enzyme is most responsible for drug metabolism overall?",opts:["CYP1A2","CYP3A4","CYP2D6","CYP2C19"],a:1,cat:"Pharmacokinetics",exp:"CYP3A4 is responsible for metabolizing ~50% of all marketed drugs. It's found in both intestinal and hepatic microsomes, contributing to first-pass metabolism and systemic clearance."},
+{q:"Ritonavir at low doses ('boosting') is used with other HIV drugs because it:",opts:["Has direct antiretroviral activity","Inhibits CYP3A4, increasing co-drug plasma levels","Reduces HIV viral load","Improves CD4 counts directly"],a:1,cat:"Pharmacology",exp:"Low-dose ritonavir (pharmacokinetic booster) inhibits CYP3A4, increasing plasma concentrations and AUC of co-administered protease inhibitors (lopinavir/r, darunavir/r), allowing reduced dosing frequency."},
+{q:"In pediatric dosing using Young's formula, what factor is used?",opts:["Weight in kg","Age in years","Body surface area","Creatinine clearance"],a:1,cat:"Calculations",exp:"Young's formula: Child dose = (Age/(Age+12)) × Adult dose. Clark's rule uses weight: (weight in lbs/150) × adult dose. BSA methods are more accurate for chemotherapy and critical drugs."},
+{q:"Which antimicrobial is the drug of choice for Lyme disease (Borrelia burgdorferi) in adults?",opts:["Azithromycin","Doxycycline","Amoxicillin","Ciprofloxacin"],a:1,cat:"Pharmacotherapy",exp:"Doxycycline 100 mg BID × 10-21 days is first-line for early Lyme disease in adults. Amoxicillin or cefuroxime is used in children <8 (doxycycline stains developing teeth) and pregnant women."},
+{q:"Latent tuberculosis infection (LTBI) is most commonly treated with:",opts:["Rifampin alone","Isoniazid (INH) 300 mg daily for 9 months","Pyrazinamide alone","Three-drug therapy"],a:1,cat:"Pharmacotherapy",exp:"INH 9 months is the classic standard for LTBI. Rifampin 4 months is an acceptable alternative with better completion rates. Pyridoxine (B6) is given with INH to prevent peripheral neuropathy."},
+{q:"Which NSAID is most selective for COX-2 and thus has lower GI toxicity?",opts:["Ibuprofen","Celecoxib","Naproxen","Indomethacin"],a:1,cat:"Pharmacology",exp:"Celecoxib is a selective COX-2 inhibitor, sparing gastric COX-1 prostaglandins (cytoprotective). This results in lower GI ulcer rates. However, cardiovascular risks (elevated with all NSAIDs) remain a concern."},
+{q:"Naloxegol is used for:",opts:["Opioid overdose reversal","Opioid-induced constipation (peripheral-acting)","Alcohol dependence","Nausea treatment"],a:1,cat:"Pharmacology",exp:"Naloxegol (PAMORA - peripherally acting mu-opioid receptor antagonist) treats opioid-induced constipation without crossing the BBB, so it doesn't reverse central analgesia or precipitate withdrawal."},
+{q:"The mechanism of dabigatran's anticoagulation is:",opts:["Vitamin K antagonism","Direct thrombin inhibitor","Factor Xa inhibitor","Platelet P2Y12 inhibitor"],a:1,cat:"Pharmacology",exp:"Dabigatran (Pradaxa) is a direct thrombin (Factor IIa) inhibitor. Reversal agent: idarucizumab (Praxbind). Other DOACs: rivaroxaban, apixaban, edoxaban inhibit Factor Xa. Andexanet alfa reverses Xa inhibitors."},
+{q:"Which drug is used to reverse the effects of apixaban?",opts:["Protamine sulfate","Andexanet alfa","Idarucizumab","Vitamin K"],a:1,cat:"Pharmacology",exp:"Andexanet alfa (Andexxa) is the reversal agent for anti-Factor Xa inhibitors (apixaban, rivaroxaban). Idarucizumab reverses dabigatran. Protamine reverses heparin/enoxaparin partially."},
+{q:"Dupilumab is used for severe atopic dermatitis. Its mechanism is:",opts:["PDE-4 inhibition","IL-4 and IL-13 pathway blockade (anti-IL-4Rα)","TNF-alpha inhibition","IgE inhibition"],a:1,cat:"Pharmacology",exp:"Dupilumab (Dupixent) targets the IL-4Rα subunit shared by IL-4 and IL-13 receptors, blocking key Th2 cytokines driving atopic dermatitis. Also approved for asthma and eosinophilic esophagitis."},
+{q:"SGLT-2 inhibitors work in the kidney by:",opts:["Increasing GFR","Blocking sodium-glucose cotransporter 2, increasing urinary glucose excretion","Promoting aldosterone release","Increasing tubular glucose reabsorption"],a:1,cat:"Pharmacology",exp:"SGLT-2 inhibitors (empagliflozin, dapagliflozin, canagliflozin) block SGLT-2 in the proximal tubule, preventing glucose reabsorption and excreting ~70-80g glucose/day in urine, lowering blood glucose."},
+{q:"Buprenorphine's pharmacological property that makes it useful for OUD treatment is:",opts:["Full agonist activity at mu receptors","Partial agonist at mu and antagonist at kappa receptors with ceiling effect","Pure antagonist activity","Long-acting full agonist"],a:1,cat:"Pharmacology",exp:"Buprenorphine is a partial mu-opioid agonist with high receptor affinity and a ceiling effect for respiratory depression, making it safer than full agonists. Combined with naloxone (Suboxone) to deter IV misuse."},
+{q:"Which drug is indicated for treatment of opioid use disorder AND is a full opioid agonist?",opts:["Naltrexone","Buprenorphine","Methadone","Naloxone"],a:2,cat:"Pharmacology",exp:"Methadone is a full mu-opioid agonist with long half-life (24-36 hrs) used for OUD treatment and pain. For OUD, it can only be dispensed through federally certified opioid treatment programs (OTPs)."},
+{q:"Which drug is used to prevent respiratory distress syndrome in preterm infants?",opts:["Surfactant nebulization to mother","Antenatal corticosteroids (betamethasone) given to mother","Vitamin K injection","Phenobarbital to the neonate"],a:1,cat:"Pharmacotherapy",exp:"Betamethasone (or dexamethasone) 2 doses IM given to the mother accelerates fetal lung maturity, reducing RDS, IVH, and neonatal mortality. Given when delivery expected 24h-7 days, at 23-34 weeks gestation."},
+{q:"Which enzyme converts arachidonic acid to prostaglandins?",opts:["5-lipoxygenase","Cyclooxygenase (COX)","Phospholipase A2","Thromboxane synthase"],a:1,cat:"Pharmacology",exp:"Cyclooxygenase (COX-1 and COX-2) converts arachidonic acid → prostaglandin H2 (PGH2), the precursor to prostaglandins, thromboxanes, and prostacyclin. NSAIDs/aspirin inhibit COX."},
+{q:"Amiodarone side effects include all EXCEPT:",opts:["Pulmonary toxicity","Thyroid dysfunction","Corneal microdeposits","Seizures (primary)"],a:3,cat:"Pharmacology",exp:"Amiodarone is notorious for side effects: pulmonary toxicity (most serious), thyroid (hypo- or hyperthyroidism), corneal microdeposits, photosensitivity, hepatotoxicity, and neuropathy. Seizures are NOT a primary side effect."},
+{q:"Which drug used for HIV has the serious side effect of lactic acidosis?",opts:["Atazanavir","Zidovudine (AZT) and other NRTIs","Efavirenz","Dolutegravir"],a:1,cat:"Pharmacotherapy",exp:"NRTIs (nucleoside reverse transcriptase inhibitors) inhibit mitochondrial DNA polymerase gamma, causing mitochondrial toxicity — lactic acidosis, hepatic steatosis, lipoatrophy. Highest risk: stavudine > zidovudine."},
+{q:"The mechanism of resistance to beta-lactam antibiotics in gram-negative bacteria is most commonly:",opts:["Altered PBP","Beta-lactamase production (ESBLs, AmpC)","Efflux pump only","Decreased ribosomal binding"],a:1,cat:"Microbiology",exp:"In gram-negatives, the most common resistance is beta-lactamase production (including ESBLs). ESBLs (extended-spectrum) hydrolyze most beta-lactams except carbapenems and are common in E. coli and Klebsiella."},
+{q:"Which medication is used for the prophylaxis of Pneumocystis jirovecii pneumonia (PCP) in HIV patients?",opts:["Fluconazole","Trimethoprim-sulfamethoxazole (TMP-SMX)","Azithromycin","Isoniazid"],a:1,cat:"Pharmacotherapy",exp:"TMP-SMX (Bactrim, co-trimoxazole) is the preferred PCP prophylaxis for HIV patients with CD4 <200 cells/μL. Also provides prophylaxis against Toxoplasma. Dapsone or atovaquone for sulfa-allergic patients."},
+{q:"Spironolactone reduces mortality in heart failure primarily by:",opts:["Reducing preload only","Aldosterone antagonism reducing cardiac remodeling and fibrosis","Increasing heart rate","Blocking beta receptors"],a:1,cat:"Cardiology",exp:"Spironolactone (and eplerenone) are MRAs that block aldosterone, reducing myocardial and vascular fibrosis ('remodeling'), improving EF and survival in HFrEF. RALES and EPHESUS trials demonstrated mortality benefit."},
+{q:"Which drug interaction increases the risk of serotonin syndrome?",opts:["Warfarin + aspirin","Tramadol + MAOIs","Digoxin + amiodarone","Metformin + alcohol"],a:1,cat:"Drug Interactions",exp:"Tramadol inhibits serotonin/norepinephrine reuptake and is a weak mu agonist. Combined with MAOIs, it can cause serotonin syndrome. Also risky: tramadol + SSRIs, SNRIs, triptans, linezolid, methylene blue."},
+{q:"Which antiretroviral class prevents integration of HIV DNA into host cell DNA?",opts:["Nucleoside RTIs (NRTIs)","Integrase strand transfer inhibitors (INSTIs)","Protease inhibitors","Entry inhibitors"],a:1,cat:"Pharmacotherapy",exp:"INSTIs (dolutegravir, bictegravir, raltegravir, elvitegravir) block HIV integrase, preventing viral DNA integration into the host genome. They are preferred in initial HIV regimens due to high efficacy and tolerability."},
+{q:"Phenytoin exhibits Michaelis-Menten (saturable, zero-order) kinetics at therapeutic doses, meaning:",opts:["Dose adjustments have linear effects","Small dose increases can cause disproportionately large increases in plasma levels","Dose adjustments have no effect","Drug is eliminated by kidneys only"],a:1,cat:"Pharmacokinetics",exp:"Phenytoin saturates hepatic CYP2C9 metabolism at therapeutic concentrations. Small dose increases from ~300→400 mg/day can dramatically raise plasma levels from 15→40 mcg/mL, causing toxicity."},
+{q:"Vancomycin trough monitoring targets are being replaced by AUC/MIC monitoring because:",opts:["Trough-only monitoring overestimates exposure","AUC/MIC better predicts efficacy and reduces nephrotoxicity","Trough is too difficult to measure","AUC/MIC is cheaper"],a:1,cat:"Pharmacokinetics",exp:"AUC-guided vancomycin monitoring (target AUC24/MIC 400-600) correlates better with clinical outcomes and minimizes nephrotoxicity risk compared to high-trough-only monitoring strategies."},
+{q:"Fluoroquinolone antibiotics act by inhibiting:",opts:["Dihydrofolate reductase","DNA gyrase (topoisomerase II) and topoisomerase IV","Cell wall synthesis","Protein synthesis at 50S"],a:1,cat:"Pharmacology",exp:"Fluoroquinolones inhibit bacterial DNA gyrase (gram-negatives primarily) and topoisomerase IV (gram-positives primarily), preventing DNA supercoiling/relaxation needed for replication. Concentration-dependent activity."},
+{q:"Which GLP-1 receptor agonist has demonstrated the greatest weight loss?",opts:["Exenatide","Semaglutide 2.4 mg weekly (Wegovy)","Dulaglutide","Liraglutide 1.8 mg"],a:1,cat:"Pharmacotherapy",exp:"Semaglutide 2.4 mg SC weekly (Wegovy) demonstrated ~15-17% body weight reduction in STEP trials — the highest among GLP-1 RAs. Tirzepatide (dual GIP/GLP-1) achieves even greater weight loss (~20%)."},
+{q:"Which medication class is used to prevent osteoporosis progression in postmenopausal women as first-line?",opts:["Calcitonin","Bisphosphonates (alendronate, risedronate)","RANKL inhibitors","PTH analogs"],a:1,cat:"Pharmacotherapy",exp:"Bisphosphonates (alendronate, risedronate) are first-line for osteoporosis treatment, inhibiting osteoclast-mediated bone resorption. They reduce vertebral fractures ~50%, hip fractures ~40%."},
+{q:"Cinacalcet (Sensipar) is used to treat secondary hyperparathyroidism by:",opts:["Blocking PTH receptors","Activating calcium-sensing receptors (calcimimetic), suppressing PTH","Directly lowering calcium intake","Vitamin D replacement"],a:1,cat:"Pharmacology",exp:"Cinacalcet is a calcimimetic that activates calcium-sensing receptors on parathyroid cells, decreasing PTH secretion. Used for secondary hyperparathyroidism in CKD dialysis patients and parathyroid carcinoma."},
+{q:"Which drug is used for treatment of benign prostatic hyperplasia by relaxing urinary smooth muscle?",opts:["Finasteride","Tamsulosin (alpha-1 blocker)","Sildenafil","Oxybutynin"],a:1,cat:"Pharmacology",exp:"Alpha-1 blockers (tamsulosin, terazosin, doxazosin) relax smooth muscle in the prostate and bladder neck, improving urine flow rapidly. 5-alpha reductase inhibitors (finasteride) shrink the prostate over months."},
+{q:"The most common side effect of ACE inhibitors requiring discontinuation is:",opts:["Hyperkalemia","Dry cough","Angioedema","Hypotension"],a:1,cat:"Pharmacology",exp:"ACE inhibitors cause dry persistent cough in ~15-20% of patients (more in Asian populations) due to bradykinin accumulation. ARBs do NOT cause this. Angioedema is rare but potentially life-threatening."},
+{q:"Mechanism of action of loop diuretics (furosemide):",opts:["Block NCC in distal tubule","Inhibit Na-K-2Cl cotransporter in thick ascending limb","Block ENaC in collecting duct","Inhibit carbonic anhydrase in proximal tubule"],a:1,cat:"Pharmacology",exp:"Furosemide inhibits NKCC2 (Na⁺-K⁺-2Cl⁻ cotransporter) in the thick ascending limb of Henle, blocking ~25% of filtered sodium reabsorption. This is the most potent class of diuretics."},
+{q:"Which drug prevents neural tube defects when taken periconceptionally?",opts:["Iron","Folic acid (400-800 mcg/day)","Vitamin D","Calcium"],a:1,cat:"Clinical Nutrition",exp:"Folic acid 400-800 mcg/day started at least 1 month before conception reduces neural tube defects (spina bifida, anencephaly) by ~70%. High-risk women (prior NTD, on antiepileptics) need 4 mg/day."},
+{q:"Which condition requires avoidance of potassium-rich foods?",opts:["Hypokalemia","Hyperkalemia (or CKD with K retention)","Diabetes mellitus","Hyponatremia"],a:1,cat:"Clinical Nutrition",exp:"Hyperkalemia patients (and CKD with K retention) must restrict high-potassium foods: bananas, oranges, potatoes, tomatoes, spinach. Hyperkalemia (>5.5 mEq/L) risks fatal cardiac arrhythmias."},
+{q:"Which medication is used for smoking cessation by partial agonism at nicotinic receptors?",opts:["Bupropion (Wellbutrin)","Varenicline (Chantix)","Nicotine patch","Clonidine"],a:1,cat:"Pharmacotherapy",exp:"Varenicline is a partial nicotinic acetylcholine receptor (α4β2) agonist — it reduces cravings by providing partial stimulation while blocking nicotine's full effect. Most effective pharmacotherapy for smoking cessation."},
+{q:"Carboplatin dosing is calculated based on:",opts:["Body surface area only","AUC using Calvert formula","Weight in kg","Creatinine clearance only"],a:1,cat:"Oncology",exp:"Carboplatin dose = Target AUC × (GFR + 25) — the Calvert formula. This AUC-based dosing accounts for renal function (carboplatin is primarily renally eliminated) and reduces under/overdosing compared to BSA."},
+{q:"Which antiepileptic is a broad-spectrum drug effective for multiple seizure types including absence and partial?",opts:["Ethosuximide","Valproic acid","Carbamazepine","Phenytoin"],a:1,cat:"Neurology",exp:"Valproic acid is a broad-spectrum AED effective for absence, myoclonic, tonic-clonic, and partial seizures. Mechanism: blocks voltage-gated Na+ channels, increases GABA. Teratogenic (neural tube defects)."},
+{q:"The drug of choice for status epilepticus in adults is:",opts:["Phenytoin IV","IV lorazepam or IV diazepam","IV valproate","IM midazolam"],a:1,cat:"Neurology",exp:"Benzodiazepines (IV lorazepam 0.1 mg/kg, IV diazepam, or IM midazolam) are first-line for status epilepticus. Second-line: IV fosphenytoin, valproate, or levetiracetam if BZDs fail."},
+{q:"Which imaging finding is consistent with pulmonary embolism on CT pulmonary angiography?",opts:["Consolidation","Filling defect in pulmonary artery","Ground glass opacity","Cavitation"],a:1,cat:"Clinical Sciences",exp:"CTPA (gold standard for PE) shows intraluminal filling defects (clots) in pulmonary arteries. Other findings: Hampton's hump, Westermark sign (oligemia). D-dimer is sensitive but not specific for PE."},
+{q:"Which drug causes irreversible platelet inhibition?",opts:["Ibuprofen","Aspirin","Clopidogrel","Both aspirin and clopidogrel"],a:3,cat:"Pharmacology",exp:"Both aspirin (irreversible COX-1 acetylation) and clopidogrel (irreversible P2Y12 blockade) cause lifelong inhibition of affected platelets (~7-10 days). Ibuprofen's COX inhibition is reversible."},
+{q:"The CHADS2-VASc score is used to assess stroke risk in:",opts:["DVT","Atrial fibrillation","Carotid artery stenosis","Peripheral artery disease"],a:1,cat:"Cardiology",exp:"CHA₂DS₂-VASc score estimates annual stroke risk in non-valvular atrial fibrillation. Score ≥2 (men) or ≥3 (women) → anticoagulation recommended. Factors: CHF, HTN, Age≥75(x2), DM, Stroke(x2), Vascular disease, Age 65-74, Sex=F."},
+{q:"Omalizumab's mechanism in severe asthma is:",opts:["IL-5 inhibition","Anti-IgE monoclonal antibody reducing mast cell activation","IL-4/13 pathway blockade","Leukotriene inhibition"],a:1,cat:"Pulmonology",exp:"Omalizumab (Xolair) binds free IgE and blocks IgE-FcεRI interaction on mast cells and basophils, reducing allergic response. Used for moderate-severe allergic (IgE-mediated) asthma not controlled by ICS."},
+{q:"Reye's syndrome is associated with which combination?",opts:["Acetaminophen + viral illness","Aspirin use during viral illness in children","Ibuprofen + bacterial infection","NSAIDs + adult patients"],a:1,cat:"Pediatrics",exp:"Reye's syndrome: hepatic encephalopathy + microvesicular fatty liver following viral illness (especially influenza B, varicella) in children treated with salicylates. Aspirin is contraindicated in children with viral illness."},
+{q:"Which pharmacokinetic parameter best describes how efficiently an organ (e.g. liver) removes drug from blood?",opts:["Volume of distribution","Extraction ratio","Bioavailability","Protein binding"],a:1,cat:"Pharmacokinetics",exp:"The extraction ratio (E) represents the fraction of drug removed by an organ per pass: E = (Cin-Cout)/Cin. High extraction drugs (E>0.7) have significant first-pass metabolism; low extraction (E<0.3) have high oral bioavailability."},
+{q:"The drug class with the highest potential for causing drug-induced lupus includes:",opts:["ACE inhibitors","Hydralazine, procainamide, isoniazid","Beta-blockers","SSRIs"],a:1,cat:"Pharmacology",exp:"Drug-induced lupus erythematosus (DILE) is classically associated with hydralazine, procainamide, isoniazid, minocycline, and anti-TNF agents. Usually reversible upon drug discontinuation."},
+{q:"Dextromethorphan is a common ingredient in cough preparations. It works by:",opts:["Opioid receptor agonism","Central cough suppression via NMDA receptor antagonism and sigma receptor activity","Antihistamine effect","Mucolytic action"],a:1,cat:"Pharmacology",exp:"Dextromethorphan is a non-narcotic antitussive acting on NMDA receptors and sigma receptors centrally. At high doses, it has dissociative/hallucinogenic effects. It is metabolized by CYP2D6 to dextrorphan."},
+{q:"What is the clinical significance of the MSSA vs MRSA distinction?",opts:["No difference in treatment","MSSA can be treated with anti-staphylococcal penicillins (nafcillin); MRSA requires vancomycin/daptomycin","MRSA requires carbapenems only","MSSA requires vancomycin"],a:1,cat:"Microbiology",exp:"MSSA (methicillin-susceptible) is treated with anti-staphylococcal penicillins (nafcillin, oxacillin) or cefazolin — more effective than vancomycin. MRSA has mecA gene (PBP2a), requiring vancomycin, daptomycin, or linezolid."},
+{q:"The mechanism of action of thiazide diuretics is to block:",opts:["Na-K-2Cl in loop of Henle","Na-Cl cotransporter (NCC) in distal convoluted tubule","Sodium channels in collecting duct","Carbonic anhydrase in proximal tubule"],a:1,cat:"Pharmacology",exp:"Thiazides (hydrochlorothiazide, chlorthalidone) inhibit NCC (Na⁺-Cl⁻ cotransporter, encoded by SLC12A3) in the distal convoluted tubule. They block ~5-8% of filtered Na reabsorption — less potent than loop diuretics."},
+{q:"A patient developing hypoglycemia on insulin should initially be treated with:",opts:["IV dextrose 50% only","15-20g fast-acting carbohydrate (Rule of 15) if conscious","IV glucagon only","IV insulin reduction"],a:1,cat:"Pharmacotherapy",exp:"Mild-moderate hypoglycemia (conscious patient): 15-20g rapid-acting carbs (4 glucose tablets, 4 oz juice). Recheck in 15 min; repeat if still low. Severe/unconscious: IM/SC glucagon or IV dextrose 25-50 mL D50W."},
+{q:"Which drug is most commonly associated with causing drug-induced QT prolongation in the ICU?",opts:["Metronidazole","Haloperidol IV at high doses","Vancomycin","Meropenem"],a:1,cat:"Pharmacology",exp:"IV haloperidol at high doses is the most commonly implicated agent in ICU-related QT prolongation and TdP. QTc monitoring is essential. Other ICU QT prolongers: amiodarone, methadone, azithromycin, ciprofloxacin."},
+{q:"Which antifungal is associated with the most serious nephrotoxicity?",opts:["Fluconazole","Amphotericin B deoxycholate","Voriconazole","Caspofungin"],a:1,cat:"Pharmacotherapy",exp:"Conventional amphotericin B deoxycholate (AmB-d) causes dose-dependent nephrotoxicity in ~80% of patients. Lipid formulations (AmBisome) have significantly reduced renal toxicity. Pre-hydration with NS reduces risk."},
+{q:"The difference between bactericidal and bacteriostatic antibiotics is:",opts:["Bactericidal are always superior","Bactericidal kill bacteria; bacteriostatic inhibit growth (immune system finishes the job)","Bacteriostatic have no clinical role","They differ only in mechanism"],a:1,cat:"Microbiology",exp:"Bacteriostatic antibiotics inhibit bacterial replication, relying on host immunity for clearance. Bactericidal kill bacteria directly. For immunocompromised patients or endocarditis/meningitis, bactericidal drugs are preferred."},
+{q:"A drug's apparent volume of distribution is 500 L in a 70 kg person. This suggests:",opts:["Drug is confined to plasma","Drug is extensively distributed in tissues beyond plasma/extracellular fluid","Drug is evenly distributed","Drug has high protein binding in plasma"],a:1,cat:"Pharmacokinetics",exp:"Normal blood volume ~5L, ECF ~15L, TBW ~42L. Vd 500L >> TBW means drug is sequestered in peripheral tissues (e.g., chloroquine Vd ~200-800 L/kg). High Vd suggests lipophilic or tissue-bound drug."},
+{q:"Which drug class is avoided in patients with a history of angioedema due to ACE inhibitor use?",opts:["Beta-blockers","ARBs (angiotensin receptor blockers)","Thiazide diuretics","Calcium channel blockers"],a:1,cat:"Pharmacology",exp:"ACE inhibitor angioedema is caused by bradykinin accumulation. ARBs (losartan, valsartan) do not affect bradykinin metabolism and are generally safe alternatives, but rarely can also cause angioedema (cross-reactive rate ~0.5-8%)."},
+{q:"Clindamycin is most commonly used for which type of infection?",opts:["Gram-negative UTI","Skin and soft tissue infections, especially those involving anaerobes","Pseudomonal pneumonia","Viral infections"],a:1,cat:"Pharmacotherapy",exp:"Clindamycin is used for SSTI (MRSA coverage), anaerobic infections, aspiration pneumonia, and pelvic inflammatory disease. It inhibits 50S ribosome. C. difficile risk is a significant concern with clindamycin use."},
+{q:"The RAAS cascade begins with renin acting on which substrate?",opts:["Angiotensin I","Angiotensinogen","ACE","Aldosterone precursors"],a:1,cat:"Physiology",exp:"Renin (released from juxtaglomerular cells) cleaves angiotensinogen (liver-produced) → Angiotensin I → ACE (in lungs) → Angiotensin II → vasoconstriction + aldosterone release + ADH release."},
+{q:"Furosemide is a preferred diuretic in acute pulmonary edema because:",opts:["It lowers blood pressure only","IV furosemide rapidly reduces preload via venodilation then diuresis","It directly increases cardiac output","It lowers afterload only"],a:1,cat:"Cardiology",exp:"IV furosemide has rapid onset (~5 min) venodilatory effect reducing preload before diuresis begins (30-60 min). This dual mechanism makes it highly effective for acute decompensated heart failure with pulmonary edema."},
+{q:"The term 'pharmacovigilance' refers to:",opts:["Drug clinical trials","Post-market surveillance of adverse drug reactions and drug safety","Bioequivalence testing","Drug pricing regulation"],a:1,cat:"Drug Information",exp:"Pharmacovigilance is the science and activities relating to the detection, assessment, understanding, and prevention of adverse effects or any other medicine/vaccine related problem (WHO definition). Includes MedWatch, FAERS."},
+{q:"P-glycoprotein (P-gp) efflux pump limits drug absorption by:",opts:["Metabolizing drugs in the gut","Pumping absorbed drugs back into gut lumen, reducing bioavailability","Blocking drug dissolution","Increasing hepatic extraction"],a:1,cat:"Pharmacokinetics",exp:"P-gp (MDR1, ABCB1) is an ABC transporter expressed in intestinal enterocytes, BBB, liver, and kidneys. It pumps drugs out of cells. P-gp inhibition (ritonavir, ketoconazole) increases drug bioavailability."},
+{q:"Which antibiotic class is NEVER recommended for children under 8 years due to dental staining?",opts:["Macrolides","Tetracyclines","Sulfonamides","Cephalosporins"],a:1,cat:"Pediatrics",exp:"Tetracyclines chelate calcium and deposit in developing teeth and bones, causing permanent yellow-brown staining and enamel hypoplasia in children <8 years. Doxycycline may be used cautiously for short courses."},
+{q:"Acetazolamide is a diuretic that works by inhibiting:",opts:["Na-K-2Cl transporter","Carbonic anhydrase in proximal tubule","Na-Cl cotransporter","Aldosterone receptors"],a:1,cat:"Pharmacology",exp:"Acetazolamide inhibits carbonic anhydrase in the proximal tubule, reducing HCO₃⁻ reabsorption and causing alkaline urine with bicarbonaturia. Used for glaucoma, altitude sickness, metabolic alkalosis."},
+{q:"Which immunosuppressant is most commonly associated with gingival hyperplasia?",opts:["Mycophenolate mofetil","Cyclosporine","Tacrolimus","Azathioprine"],a:1,cat:"Pharmacology",exp:"Cyclosporine (calcineurin inhibitor) causes gingival hyperplasia, hirsutism, nephrotoxicity, and hypertension. Tacrolimus has same mechanism (CNI) but less gingival hyperplasia. Both require careful TDM."},
+{q:"Statin-associated muscle toxicity (myopathy/rhabdomyolysis) risk increases with:",opts:["Low statin doses","Combination with CYP3A4 inhibitors (e.g., clarithromycin, azole antifungals)","Taking statins on empty stomach","Renal impairment only"],a:1,cat:"Drug Interactions",exp:"CYP3A4 inhibitors increase plasma statin concentrations (for statins metabolized by CYP3A4: simvastatin, lovastatin, atorvastatin), raising myopathy risk. Simvastatin 80mg is no longer recommended due to rhabdomyolysis risk."},
+{q:"The primary mechanism of heparin's anticoagulant effect is:",opts:["Direct thrombin inhibition only","Potentiation of antithrombin III, inhibiting thrombin and Factor Xa","Vitamin K antagonism","Platelet activation inhibition"],a:1,cat:"Pharmacology",exp:"Unfractionated heparin binds antithrombin III, dramatically increasing its inhibitory activity against thrombin (IIa) and Factor Xa. LMWH (enoxaparin) primarily inhibits Factor Xa > thrombin."},
+{q:"Which drug is used as maintenance therapy to prevent relapse in alcohol use disorder?",opts:["Naloxone","Disulfiram or acamprosate","Methadone","Buprenorphine"],a:1,cat:"Pharmacotherapy",exp:"Acamprosate reduces craving for alcohol (modulates GABA/glutamate). Disulfiram causes aversive reaction to alcohol (acetaldehyde accumulation). Naltrexone reduces alcohol craving by blocking endorphin reward."},
+{q:"A patient taking phenelzine (MAOI) should not be given which analgesic?",opts:["Acetaminophen","Meperidine (pethidine)","Ibuprofen","Codeine"],a:1,cat:"Drug Interactions",exp:"Meperidine + MAOIs = potentially fatal serotonin syndrome. Meperidine has serotonergic activity. Morphine and other opioids are generally safer with MAOIs but caution advised. Tramadol is also contraindicated."},
+{q:"Which mechanism underlies the anti-platelet effect of clopidogrel?",opts:["COX-1 inhibition","Irreversible P2Y12 ADP receptor blockade","Thromboxane inhibition","GP IIb/IIIa blockade"],a:1,cat:"Pharmacology",exp:"Clopidogrel (prodrug) is metabolized by CYP2C19 to an active thiol metabolite that irreversibly blocks P2Y12 receptors, preventing ADP-induced platelet aggregation. CYP2C19 poor metabolizers have reduced efficacy."},
+{q:"In patients with stable angina, which drug reduces anginal frequency by slowing heart rate?",opts:["Nitroglycerin","Beta-blockers (metoprolol, atenolol)","Aspirin","Statins"],a:1,cat:"Cardiology",exp:"Beta-blockers reduce anginal frequency by lowering heart rate and contractility, decreasing myocardial O2 demand. They are first-line for stable angina, especially in post-MI patients. Long-acting nitrates are adjuncts."},
+{q:"The Semmelweis-Lister doctrine and hand hygiene is most directly relevant to preventing:",opts:["Antimicrobial resistance","Healthcare-associated infections (HAIs)","Drug-drug interactions","Medication errors"],a:1,cat:"Clinical Sciences",exp:"Hand hygiene is the single most important intervention for preventing healthcare-associated infections (HAIs). The WHO 5 Moments for Hand Hygiene framework guides healthcare worker compliance."},
+{q:"Which formulation consideration is critical for nitroglycerin sublingual tablets?",opts:["Must be swallowed with water","Stored in original glass container, protected from light and moisture","Must be refrigerated at all times","Can be crushed and mixed with food"],a:1,cat:"Patient Counseling",exp:"Sublingual NTG tablets degrade rapidly when exposed to heat, light, or moisture. Must be stored in original amber glass bottle, tightly capped, away from body heat. Replace every 6 months after opening."},
+{q:"Probenecid inhibits the tubular secretion of penicillin. This interaction is used clinically to:",opts:["Reduce penicillin toxicity","Increase and prolong penicillin plasma levels","Accelerate penicillin elimination","Prevent penicillin resistance"],a:1,cat:"Drug Interactions",exp:"Probenecid blocks OAT (organic anion transporter) tubular secretion of penicillin, increasing plasma AUC by 2-3x. Historically used in gonorrhea treatment to maintain penicillin levels; also used with ampicillin."},
+{q:"Which drug is used to treat malignant hyperthermia?",opts:["Bromocriptine","Dantrolene","Cyproheptadine","Propranolol"],a:1,cat:"Pharmacology",exp:"Dantrolene inhibits ryanodine receptor (RyR1), preventing SR calcium release in skeletal muscle. It is the specific treatment for malignant hyperthermia (triggered by volatile anesthetics/succinylcholine) and NMS."},
+{q:"Oseltamivir for influenza should ideally be started within:",opts:["24 hours of symptom onset","48 hours of symptom onset","72 hours of symptom onset","One week of exposure"],a:1,cat:"Pharmacotherapy",exp:"Oseltamivir is most effective when initiated within 48 hours of symptom onset, reducing illness duration by ~1-1.5 days. For hospitalized or high-risk patients, treatment is recommended regardless of time from onset."},
+{q:"The mechanism of action of glipizide (sulfonylurea) in type 2 diabetes is:",opts:["Increasing insulin sensitivity","Stimulating insulin secretion by blocking pancreatic KATP channels","Inhibiting hepatic gluconeogenesis","Delaying carbohydrate absorption"],a:1,cat:"Pharmacology",exp:"Sulfonylureas bind SUR1 subunit of KATP channels on pancreatic beta cells, depolarizing the cell membrane, triggering Ca²⁺ influx and insulin secretion independent of blood glucose. Risk: hypoglycemia."},
+{q:"Which combination is used as first-line HIV treatment (ART) in most guidelines?",opts:["Efavirenz + zidovudine + lamivudine","Bictegravir/tenofovir AF/emtricitabine (Biktarvy)","Lopinavir/ritonavir + lamivudine","Nevirapine + TDF + FTC"],a:1,cat:"Pharmacotherapy",exp:"Current DHHS preferred initial regimen: BIC/TAF/FTC (Biktarvy) or DTG + TAF/FTC (Dovato, Triumeq). High efficacy, once daily, low side effects, high genetic barrier to resistance."},
+{q:"Which drug is a direct renin inhibitor?",opts:["Losartan","Aliskiren","Ramipril","Spironolactone"],a:1,cat:"Pharmacology",exp:"Aliskiren (Tekturna) is the only approved direct renin inhibitor, blocking the first step of the RAAS cascade. It reduces plasma renin activity and angiotensin I/II levels. Use with ACEi or ARB is discouraged (renal risk)."},
+{q:"Which route of insulin administration provides the fastest onset?",opts:["Regular insulin SC","Insulin lispro (rapid-acting analog) SC","NPH insulin SC","All routes have same onset"],a:1,cat:"Pharmacology",exp:"Rapid-acting analogs (lispro, aspart, glulisine) onset 10-15 min SC. Regular insulin: 30-60 min SC. IV regular insulin acts fastest (minutes) of all formulations."},
+{q:"Phenobarbital is a classic example of a CYP450 enzyme inducer. Induction means:",opts:["Decreased enzyme activity, increased drug levels","Increased enzyme synthesis, increased drug metabolism and decreased levels","Enzyme inhibition","No change in metabolism"],a:1,cat:"Pharmacokinetics",exp:"Enzyme induction (phenobarbital, rifampin, carbamazepine, St. John's Wort) increases CYP450 enzyme synthesis, enhancing drug metabolism and REDUCING plasma levels of affected drugs. Takes days-weeks to develop."},
+{q:"Which statement about bioequivalence is correct?",opts:["Bioequivalent drugs have identical chemical structures","Two products are bioequivalent if their AUC and Cmax are within 80-125% of each other","Bioequivalent drugs must have the same formulation","Bioequivalence implies identical clinical outcomes in all patients"],a:1,cat:"Biopharmaceutics",exp:"FDA bioequivalence: 90% CI for AUC and Cmax ratios (test/reference) must fall within 80-125%. This demonstrates similar rate and extent of absorption, supporting therapeutic equivalence for generic drug approval."},
+{q:"A patient with G6PD deficiency should avoid which antimalarial?",opts:["Atovaquone-proguanil","Primaquine","Artemether-lumefantrine","Chloroquine"],a:1,cat:"Pharmacotherapy",exp:"Primaquine (and dapsone) cause hemolytic anemia in G6PD-deficient patients. G6PD is essential for generating NADPH, protecting RBCs from oxidative stress. Rasburicase is also contraindicated in G6PD deficiency."},
+{q:"The mechanism of resistance to fluoroquinolones includes:",opts:["Beta-lactamase production","Mutations in DNA gyrase/topoisomerase IV, efflux pump upregulation","Altered PBP","ESBL production"],a:1,cat:"Microbiology",exp:"FQ resistance: point mutations in gyrA/gyrB (gyrase) and parC/parE (topoisomerase IV), efflux pump overexpression (MexAB-OprM in Pseudomonas), and reduced porin expression. Rapidly selected in high-use settings."},
+{q:"In palliative care, which opioid is considered first-line for moderate-to-severe cancer pain per WHO ladder?",opts:["Codeine","Morphine or oxycodone","Tramadol","Buprenorphine"],a:1,cat:"Pharmacotherapy",exp:"WHO pain ladder Step 3 (severe pain): strong opioids — morphine (oral is gold standard), oxycodone, hydromorphone. Morphine is the most widely used internationally. Regular dosing + breakthrough doses."},
+{q:"Drug repurposing refers to:",opts:["Generic drug approval","Using an approved drug for a new indication","Reformulating an existing drug","Creating a prodrug"],a:1,cat:"Drug Information",exp:"Drug repurposing (repositioning) involves finding new therapeutic applications for existing approved drugs. Examples: sildenafil (ED→PAH), thalidomide (morning sickness→multiple myeloma), metformin (DM→potential anti-aging)."},
+{q:"Which antidepressant is preferred in patients with neuropathic pain and depression?",opts:["Fluoxetine","Duloxetine (SNRI)","Escitalopram","Bupropion"],a:1,cat:"Psychiatry",exp:"Duloxetine (Cymbalta) is FDA-approved for both depression AND diabetic peripheral neuropathy, fibromyalgia, and chronic musculoskeletal pain. SNRIs are preferred over SSRIs for comorbid pain and depression."},
+{q:"The pharmacokinetic process affected by renal impairment is primarily:",opts:["Absorption","Elimination (excretion)","Distribution","Protein binding"],a:1,cat:"Pharmacokinetics",exp:"Kidneys eliminate drugs and their metabolites by filtration and secretion. Renal impairment reduces drug elimination, increasing plasma levels and t½. Dose adjustment or extended intervals are required for renally-cleared drugs."},
+{q:"Which medication is the antidote for acetaminophen overdose and its mechanism is:",opts:["Activated charcoal","N-acetylcysteine (NAC) — replenishes glutathione to conjugate toxic NAPQI","Methylene blue","Calcium gluconate"],a:1,cat:"Toxicology",exp:"Acetaminophen overdose → NAPQI formation (toxic CYP2E1 metabolite) that depletes glutathione. NAC provides cysteine for glutathione synthesis AND directly conjugates NAPQI. Most effective within 8-10 hours."},
+{q:"Therapeutic drug monitoring (TDM) is most important for drugs with:",opts:["Wide therapeutic index","Narrow therapeutic index and variable pharmacokinetics","Good oral bioavailability only","Linear pharmacokinetics"],a:1,cat:"Pharmacokinetics",exp:"TDM is indicated for narrow therapeutic index drugs (vancomycin, aminoglycosides, digoxin, lithium, phenytoin, carbamazepine, cyclosporine, tacrolimus) where small concentration changes significantly affect efficacy or toxicity."},
+{q:"Which class of drugs reduces uric acid production in gout?",opts:["Probenecid and sulfinpyrazone","Allopurinol and febuxostat (XO inhibitors)","Colchicine","Indomethacin"],a:1,cat:"Pharmacotherapy",exp:"Allopurinol and febuxostat inhibit xanthine oxidase (XO), blocking conversion of hypoxanthine→xanthine→uric acid, reducing uric acid production. Target uric acid <6 mg/dL. Rasburicase converts uric acid to allantoin."},
+{q:"Which drug is used for benzodiazepine overdose reversal?",opts:["Naloxone","Flumazenil","Physostigmine","Neostigmine"],a:1,cat:"Toxicology",exp:"Flumazenil is a competitive BZD antagonist at GABA-A receptors. Caution: short duration (1 hr), resedation common; may precipitate seizures in chronic BZD users. Not typically used in chronic BZD overdose."},
+{q:"Intrinsic clearance of a high extraction ratio drug is important because:",opts:["Protein binding determines its clearance","Hepatic blood flow is the rate-limiting factor for clearance","Renal clearance dominates","Gut metabolism predominates"],a:1,cat:"Pharmacokinetics",exp:"High extraction drugs (E>0.7) — clearance ≈ hepatic blood flow (flow-limited). Liver disease, CHF (reducing flow) significantly affects these drugs. Protein binding changes have little effect on high-ER drug clearance."},
+{q:"Which anticoagulant does NOT require routine laboratory monitoring in most patients?",opts:["Warfarin","Apixaban (DOAC)","Heparin infusion","Low molecular weight heparin (LMWH) in most patients"],a:3,cat:"Pharmacology",exp:"LMWHs (enoxaparin, dalteparin) have predictable PK and do not require routine anti-Xa monitoring except in special populations (extremes of weight, pregnancy, renal impairment). DOACs (apixaban, rivaroxaban) also need no routine monitoring."},
+{q:"The MOST common cause of medication errors in pharmacy practice is:",opts:["Drug interactions","Look-alike/sound-alike (LASA) drug name confusion","Expired medications","Inappropriate storage"],a:1,cat:"Pharmacy Practice",exp:"LASA (look-alike/sound-alike) drug names are a leading cause of medication errors. ISMP maintains a list of high-alert LASA medications. Tall man lettering, physical separation, and barcode scanning reduce these errors."},
+{q:"A 'black box warning' (boxed warning) in the package insert indicates:",opts:["A minor side effect","The most serious warnings based on clinical trials or post-marketing reports, required by FDA","An off-label use","A contraindication in pregnancy only"],a:1,cat:"Pharmacy Law",exp:"Black box warnings are the FDA's strongest safety warnings, placed prominently in the prescribing information (package insert). They highlight serious adverse effects, contraindications, or restrictions on use that may affect prescribing decisions."},
+{q:"The FDA MedWatch program is designed for:",opts:["Drug pricing complaints","Voluntary reporting of serious adverse drug events, medication errors, and product problems","Drug approval applications","Pharmacy licensing"],a:1,cat:"Pharmacy Law",exp:"MedWatch is the FDA's Safety Reporting Portal for healthcare professionals and consumers to voluntarily report serious adverse events, medication errors, product quality problems, and therapeutic failures with drugs, biologics, and devices."},
+{q:"Pharmacists in the US are required to maintain what type of records for Schedule II controlled substances?",opts:["No special records required","Complete and accurate records, inventoried every 2 years, separate from non-controlled records","Only electronic records","Records for 1 year only"],a:1,cat:"Pharmacy Law",exp:"CSA requires pharmacies to maintain complete records for all controlled substances. Schedule II records must be kept separate from non-controlled records. Biennial inventory required. Records kept for minimum 2 years."},
+];
+
+// ── EXAM STATE ──
+let student = {};
+let current = 0;
+let answers = new Array(200).fill(null);
+let timerInterval;
+let secondsLeft = 3 * 60 * 60; // 3 hours
+let examStartTime;
+
+// ── REGISTRATION ──
+function startExam() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const year = document.getElementById('reg-year').value;
+  const country = document.getElementById('reg-country').value.trim();
+  if (!name || !email || !year || !country) {
+    alert('Please fill in all fields to continue.');
+    return;
+  }
+  student = { name, email, year, country };
+
+  // Send email via mailto (client-side best effort)
+  const subject = encodeURIComponent(`FPGEE Mock Exam Registration – ${name}`);
+  const body = encodeURIComponent(`New FPGEE Mock Exam Registration:\n\nName: ${name}\nEmail: ${email}\nPlanned FPGEE Year: ${year}\nCountry of Degree: ${country}\n\nSent automatically via Connectek Rx Success FPGEE Mock Exam Portal.`);
+  // Open mailto silently attempt
+  const a = document.createElement('a');
+  a.href = `mailto:pharmacy.connectek@gmail.com?subject=${subject}&body=${body}`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  showPage('exam-page');
+  document.getElementById('main-header').style.display = 'flex';
+  buildNavigator();
+  renderQuestion(0);
+  startTimer();
+  examStartTime = Date.now();
+}
+
+// ── TIMER ──
+function startTimer() {
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    if (secondsLeft <= 0) {
+      clearInterval(timerInterval);
+      submitExam();
+      return;
+    }
+    const h = Math.floor(secondsLeft / 3600);
+    const m = Math.floor((secondsLeft % 3600) / 60);
+    const s = secondsLeft % 60;
+    document.getElementById('timer').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (secondsLeft <= 600) document.getElementById('timer').style.color = '#ef4444';
+  }, 1000);
+}
+
+// ── BUILD NAVIGATOR ──
+function buildNavigator() {
+  const nav = document.getElementById('q-navigator');
+  nav.innerHTML = '';
+  for (let i = 0; i < QS.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot' + (i === 0 ? ' current' : '');
+    dot.textContent = i + 1;
+    dot.id = `dot-${i}`;
+    dot.onclick = () => { if (answers[current] !== null) goTo(i); else goTo(i); };
+    nav.appendChild(dot);
+  }
+}
+
+function updateNavigator() {
+  for (let i = 0; i < QS.length; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    if (!dot) continue;
+    dot.className = 'q-dot';
+    if (answers[i] !== null) dot.classList.add('answered');
+    if (i === current) dot.classList.add('current');
+  }
+}
+
+// ── RENDER QUESTION ──
+function renderQuestion(idx) {
+  current = idx;
+  const q = QS[idx];
+  const pct = ((idx + 1) / QS.length * 100).toFixed(1);
+
+  document.getElementById('prog-label').textContent = `Question ${idx+1} of ${QS.length}`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `Q ${idx+1} / ${QS.length}`;
+
+  const optLetters = ['A','B','C','D'];
+  let optsHTML = q.opts.map((opt, i) => {
+    let cls = 'option';
+    let letterCls = 'opt-letter';
+    if (answers[idx] !== null) {
+      cls += ' disabled';
+      if (i === q.a) cls += ' correct';
+      else if (i === answers[idx]) cls += ' wrong';
+    } else if (answers[idx] === i) {
+      cls += ' selected';
+    }
+    return `<div class="${cls}" onclick="selectAnswer(${idx},${i})" id="opt-${idx}-${i}">
+      <div class="${letterCls}">${optLetters[i]}</div>
+      <div class="opt-text">${opt}</div>
+    </div>`;
+  }).join('');
+
+  const expDisplay = answers[idx] !== null ? 'show' : '';
+  const wrap = document.getElementById('q-card-wrap');
+  wrap.innerHTML = `<div class="q-card">
+    <div class="q-meta">
+      <span class="q-num">Q${idx+1}</span>
+      <span class="q-cat">${q.cat}</span>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="options">${optsHTML}</div>
+    <div class="explanation ${expDisplay}">
+      <strong>✅ Explanation:</strong> ${q.exp}
+    </div>
+  </div>`;
+
+  // Update next/submit button
+  const btnNext = document.getElementById('btn-next');
+  if (idx === QS.length - 1) {
+    btnNext.textContent = 'Submit Exam';
+    btnNext.className = 'btn-nav btn-submit';
+  } else {
+    btnNext.textContent = 'Next →';
+    btnNext.className = 'btn-nav btn-next';
+  }
+
+  updateNavigator();
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (answers[qIdx] !== null) return;
+  answers[qIdx] = optIdx;
+  renderQuestion(qIdx);
+}
+
+function changeQ(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < QS.length) renderQuestion(next);
+}
+
+function goTo(idx) {
+  renderQuestion(idx);
+}
+
+function nextOrSubmit() {
+  if (current === QS.length - 1) {
+    const unanswered = answers.filter(a => a === null).length;
+    if (unanswered > 0) {
+      if (!confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+    }
+    submitExam();
+  } else {
+    changeQ(1);
+  }
+}
+
+// ── SUBMIT ──
+function submitExam() {
+  clearInterval(timerInterval);
+  const elapsed = Math.floor((Date.now() - examStartTime) / 1000);
+  buildResults(elapsed);
+  showPage('result-page');
+  document.getElementById('main-header').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+// ── RESULTS ──
+function buildResults(elapsed) {
+  let correct = 0, wrong = 0, skipped = 0;
+  const catData = {};
+
+  QS.forEach((q, i) => {
+    if (!catData[q.cat]) catData[q.cat] = { total:0, correct:0 };
+    catData[q.cat].total++;
+    if (answers[i] === null) { skipped++; }
+    else if (answers[i] === q.a) { correct++; catData[q.cat].correct++; }
+    else { wrong++; }
+  });
+
+  const score = ((correct / QS.length) * 100).toFixed(1);
+  const pass = parseFloat(score) >= 75;
+  const timeTaken = `${Math.floor(elapsed/3600)}h ${Math.floor((elapsed%3600)/60)}m`;
+
+  // Hero
+  const hero = document.getElementById('result-hero');
+  hero.style.setProperty('--pct', score + '%');
+  hero.innerHTML = `
+    <div class="result-score-ring" style="--pct:${score}%">
+      <div class="score-inner"><span>${score}%</span><small>Score</small></div>
+    </div>
+    <h2>Exam Complete, ${student.name.split(' ')[0]}!</h2>
+    <div class="result-verdict ${pass ? 'verdict-pass' : 'verdict-fail'}">${pass ? '🎉 PASS – Well Done!' : '📚 Needs Improvement'}</div>
+    <p style="color:var(--muted); font-size:0.9rem;">Planned FPGEE Year: <strong style="color:var(--teal)">${student.year}</strong> &nbsp;|&nbsp; Country: <strong style="color:var(--teal)">${student.country}</strong></p>
+    <div class="result-grid">
+      <div class="result-stat stat-correct"><strong>${correct}</strong><span>Correct</span></div>
+      <div class="result-stat stat-wrong"><strong>${wrong}</strong><span>Incorrect</span></div>
+      <div class="result-stat stat-skip"><strong>${skipped}</strong><span>Skipped</span></div>
+      <div class="result-stat stat-time"><strong>${timeTaken}</strong><span>Time Taken</span></div>
+    </div>
+    <p style="margin-top:20px; font-size:0.82rem; color:var(--muted);">Powered by <strong style="color:var(--teal)">Connectek Rx Success</strong> | pharmacy.connectek@gmail.com</p>
+  `;
+
+  // Category breakdown
+  const catSection = document.getElementById('cat-breakdown');
+  let catRows = Object.entries(catData).map(([cat, d]) => {
+    const p = d.total > 0 ? ((d.correct/d.total)*100).toFixed(0) : 0;
+    const barColor = p>=75 ? 'var(--correct)' : p>=50 ? 'var(--gold)' : 'var(--wrong)';
+    return `<div class="cat-row">
+      <div class="cat-label">${cat}</div>
+      <div class="cat-bar-wrap"><div class="cat-bar" style="width:${p}%; background:${barColor}"></div></div>
+      <div class="cat-pct">${d.correct}/${d.total}</div>
+    </div>`;
+  }).join('');
+  catSection.innerHTML = `<h3>📊 Performance by Category</h3>${catRows}`;
+
+  // Detailed Review
+  const reviewSection = document.getElementById('review-section');
+  let reviewHTML = `<div class="review-header">
+    <h2 class="section-title">📝 Detailed <span>Review</span></h2>
+  </div>`;
+
+  QS.forEach((q, i) => {
+    const userAns = answers[i];
+    const optLetters = ['A','B','C','D'];
+    let optsHTML = q.opts.map((opt, j) => {
+      let cls = 'rev-opt';
+      let icon = '';
+      if (j === q.a) { cls += ' correct-ans'; icon = '✅ '; }
+      if (userAns === j && j !== q.a) { cls += ' wrong'; icon = '❌ '; }
+      return `<div class="${cls}">${icon}<strong>${optLetters[j]}.</strong> ${opt}</div>`;
+    }).join('');
+
+    const status = userAns === null ? '⬛ Skipped' : userAns === q.a ? '✅ Correct' : '❌ Incorrect';
+    reviewHTML += `<div class="review-card">
+      <div class="q-meta" style="margin-bottom:10px">
+        <span class="q-num">Q${i+1}</span>
+        <span class="q-cat">${q.cat}</span>
+        <span style="font-size:0.8rem; margin-left:4px; color:var(--muted)">${status}</span>
+        ${userAns !== null ? `<span style="font-size:0.8rem; color:var(--muted)">Your answer: <strong>${optLetters[userAns]}</strong></span>` : ''}
+      </div>
+      <div class="review-q">${q.q}</div>
+      <div class="review-answers">${optsHTML}</div>
+      <div class="review-exp"><strong>💡 Explanation:</strong> ${q.exp}</div>
+    </div>`;
+  });
+
+  reviewSection.innerHTML = reviewHTML;
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
